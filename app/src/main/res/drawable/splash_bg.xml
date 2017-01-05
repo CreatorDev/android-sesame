@@ -1,5 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
 <!--
-  ~ <b>Copyright (c) 2017, Imagination Technologies Limited and/or its affiliated group companies
+  ~ <b>Copyright (c) 2016, Imagination Technologies Limited and/or its affiliated group companies
   ~  and/or licensors. </b>
   ~
   ~  All rights reserved.
@@ -29,6 +30,15 @@
   ~
   -->
 
-<resources>
-    <dimen name="button_height">48dp</dimen>
-</resources>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:drawable="@color/primary_color_purple"/>
+
+    <item>
+        <bitmap
+            android:gravity="center"
+            android:src="@drawable/rsz_creator_logo_rgb_wht"/>
+    </item>
+
+</layer-list>
