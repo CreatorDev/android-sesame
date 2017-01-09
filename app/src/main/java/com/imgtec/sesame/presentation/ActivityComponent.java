@@ -47,7 +47,6 @@ import dagger.Component;
 public interface ActivityComponent {
 
 
-
   class Initializer {
 
     private Initializer() {}
@@ -62,5 +61,6 @@ public interface ActivityComponent {
   }
 
   void inject(MainActivity activity);
+  void inject(MainFragment fragment);
 
 }

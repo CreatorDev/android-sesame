@@ -31,35 +31,43 @@
 
 package com.imgtec.sesame.data;
 
-import android.content.Context;
 import android.content.SharedPreferences;
-import android.os.Handler;
-import android.provider.Settings;
-import android.support.annotation.NonNull;
 
-import com.imgtec.di.PerApp;
-import com.imgtec.sesame.app.App;
-
-
-import dagger.Module;
-import dagger.Provides;
+import javax.inject.Inject;
 
 /**
  *
  */
-@Module
-public class DataModule {
+public class Preferences {
 
-  static final String PREFS = "data";
+  private static final String HOST = "HOST";
+  private static final String SECRET = "SECRET";
+  private static final String TOKEN = "TOKEN";
 
-  @Provides @PerApp
-  SharedPreferences provideSharedPreferences(App application) {
-    return application.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
+  private final SharedPreferences sharedPreferences;
+
+  @Inject
+  Preferences(SharedPreferences prefs) {
+    this.sharedPreferences = prefs;
   }
 
-  @Provides @PerApp
-  Preferences providesPreferences(@NonNull final SharedPreferences prefs) {
-    return new Preferences(prefs);
+  public Configuration getConfiguration() {
+    final String host = sharedPreferences.getString(HOST, "");
+    final String secret = sharedPreferences.getString(SECRET, "");
+    final String token = sharedPreferences.getString(TOKEN, "");
+
+    if (host.isEmpty() || secret.isEmpty() || token.isEmpty()) {
+      return null;
+    }
+
+    return new Configuration(host, secret, token);
   }
 
+  public void saveConfiguration(Configuration configuration) {
+    SharedPreferences.Editor editor = sharedPreferences.edit();
+    editor.putString(HOST, configuration.getHost());
+    editor.putString(SECRET, configuration.getSecret());
+    editor.putString(TOKEN, configuration.getToken());
+    editor.commit();
+  }
 }

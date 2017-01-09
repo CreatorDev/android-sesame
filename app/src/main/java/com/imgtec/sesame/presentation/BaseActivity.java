@@ -34,10 +34,13 @@ package com.imgtec.sesame.presentation;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 
+import com.imgtec.di.HasComponent;
+
 /**
  *
  */
-public abstract class BaseActivity extends AppCompatActivity {
+public abstract class BaseActivity extends AppCompatActivity
+    implements HasComponent<ActivityComponent> {
 
   ActivityComponent component;
 
@@ -54,6 +57,11 @@ public abstract class BaseActivity extends AppCompatActivity {
       component = null;
     }
     super.onDestroy();
+  }
+
+  @Override
+  public ActivityComponent getComponent() {
+    return component;
   }
 
   protected abstract void setComponent(ActivityComponent component);

@@ -33,6 +33,8 @@ package com.imgtec.sesame.presentation;
 
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -53,6 +55,17 @@ public class MainActivity extends BaseActivity {
     Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
     setSupportActionBar(toolbar);
 
+    if (savedInstanceState == null) {
+      loadFragmentWithClearBackstack(MainFragment.newInstance());
+    }
+  }
+
+  private void loadFragmentWithClearBackstack(Fragment fragment) {
+    FragmentManager fm = getSupportFragmentManager();
+    final android.support.v4.app.FragmentTransaction transaction = fm.beginTransaction();
+    fm.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+    transaction.replace(R.id.fragment_container, fragment);
+    transaction.commitAllowingStateLoss();
   }
 
   @Override

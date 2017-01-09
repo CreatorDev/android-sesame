@@ -29,37 +29,38 @@
  *
  */
 
-package com.imgtec.sesame.data;
+package com.imgtec.sesame.presentation;
 
-import android.content.Context;
-import android.content.SharedPreferences;
-import android.os.Handler;
-import android.provider.Settings;
-import android.support.annotation.NonNull;
+import android.os.Bundle;
+import android.support.annotation.Nullable;
+import android.support.v4.app.Fragment;
+import android.view.View;
 
-import com.imgtec.di.PerApp;
-import com.imgtec.sesame.app.App;
+import butterknife.ButterKnife;
+import butterknife.Unbinder;
 
+public abstract class BaseFragment extends Fragment {
 
-import dagger.Module;
-import dagger.Provides;
+  protected Unbinder unbinder;
 
-/**
- *
- */
-@Module
-public class DataModule {
-
-  static final String PREFS = "data";
-
-  @Provides @PerApp
-  SharedPreferences provideSharedPreferences(App application) {
-    return application.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
+  @Override
+  public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+    super.onViewCreated(view, savedInstanceState);
+    unbinder = ButterKnife.bind(this, view);
   }
 
-  @Provides @PerApp
-  Preferences providesPreferences(@NonNull final SharedPreferences prefs) {
-    return new Preferences(prefs);
+  @Override
+  public void onDestroyView() {
+    super.onDestroyView();
+    unbinder.unbind();
   }
+
+  @Override
+  public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+    super.onActivityCreated(savedInstanceState);
+    setComponent();
+  }
+
+  protected abstract void setComponent();
 
 }

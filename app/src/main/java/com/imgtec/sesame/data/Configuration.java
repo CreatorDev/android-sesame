@@ -31,35 +31,42 @@
 
 package com.imgtec.sesame.data;
 
-import android.content.Context;
-import android.content.SharedPreferences;
-import android.os.Handler;
-import android.provider.Settings;
-import android.support.annotation.NonNull;
-
-import com.imgtec.di.PerApp;
-import com.imgtec.sesame.app.App;
-
-
-import dagger.Module;
-import dagger.Provides;
-
 /**
  *
  */
-@Module
-public class DataModule {
+public class Configuration {
 
-  static final String PREFS = "data";
+  private String host;
+  private String secret;
+  private String token;
 
-  @Provides @PerApp
-  SharedPreferences provideSharedPreferences(App application) {
-    return application.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
+  public Configuration(String host, String secret, String token) {
+    this.host = host;
+    this.secret = secret;
+    this.token = token;
   }
 
-  @Provides @PerApp
-  Preferences providesPreferences(@NonNull final SharedPreferences prefs) {
-    return new Preferences(prefs);
+  public String getHost() {
+    return host;
   }
 
+  public void setHost(String host) {
+    this.host = host;
+  }
+
+  public String getSecret() {
+    return secret;
+  }
+
+  public void setSecret(String secret) {
+    this.secret = secret;
+  }
+
+  public String getToken() {
+    return token;
+  }
+
+  public void setToken(String token) {
+    this.token = token;
+  }
 }

@@ -32,4 +32,14 @@
 <resources>
     <string name="app_name">Sesame</string>
     <string name="action_settings">Settings</string>
+
+    <string name="enter_credentials">Web App credentials</string>
+    <string name="host">Host</string>
+    <string name="secret">Secret</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Cancel</string>
+
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>
