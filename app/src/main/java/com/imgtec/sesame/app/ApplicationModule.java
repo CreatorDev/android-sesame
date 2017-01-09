@@ -29,27 +29,56 @@
  *
  */
 
-// Top-level build file where you can add configuration options common to all sub-projects/modules.
+package com.imgtec.sesame.app;
 
-buildscript {
-    repositories {
-        jcenter()
-    }
-    dependencies {
-        classpath 'com.android.tools.build:gradle:2.3.0-beta1'
-        classpath 'com.neenbedankt.gradle.plugins:android-apt:1.8'
+import android.content.Context;
+import android.os.Handler;
 
-        // NOTE: Do not place your application dependencies here; they belong
-        // in the individual module build.gradle files
-    }
-}
+import com.imgtec.di.PerApp;
 
-allprojects {
-    repositories {
-        jcenter()
-    }
-}
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
-task clean(type: Delete) {
-    delete rootProject.buildDir
+import javax.inject.Named;
+
+import dagger.Module;
+import dagger.Provides;
+
+/**
+ *
+ */
+@Module
+public final class ApplicationModule {
+
+  final App application;
+
+  public ApplicationModule(final App app) {
+    this.application = app;
+  }
+
+  @Provides
+  @PerApp
+  App provideApplication() {
+    return application;
+  }
+
+  @Provides
+  @PerApp
+  Context provideAppContext() {
+    return application;
+  }
+
+  @Provides
+  @PerApp
+  ExecutorService provideExecutorService() {
+    return Executors.newFixedThreadPool(4);
+  }
+
+  @Provides
+  @PerApp
+  @Named("Main")
+  Handler provideHandler() {
+    return new Handler(application.getMainLooper());
+  }
+
 }

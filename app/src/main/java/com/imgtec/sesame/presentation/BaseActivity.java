@@ -29,27 +29,32 @@
  *
  */
 
-// Top-level build file where you can add configuration options common to all sub-projects/modules.
+package com.imgtec.sesame.presentation;
 
-buildscript {
-    repositories {
-        jcenter()
+import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
+
+/**
+ *
+ */
+public abstract class BaseActivity extends AppCompatActivity {
+
+  ActivityComponent component;
+
+  @Override
+  protected void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    component = ActivityComponent.Initializer.init(this);
+    setComponent(component);
+  }
+
+  @Override
+  protected void onDestroy() {
+    if (component != null) {
+      component = null;
     }
-    dependencies {
-        classpath 'com.android.tools.build:gradle:2.3.0-beta1'
-        classpath 'com.neenbedankt.gradle.plugins:android-apt:1.8'
+    super.onDestroy();
+  }
 
-        // NOTE: Do not place your application dependencies here; they belong
-        // in the individual module build.gradle files
-    }
-}
-
-allprojects {
-    repositories {
-        jcenter()
-    }
-}
-
-task clean(type: Delete) {
-    delete rootProject.buildDir
+  protected abstract void setComponent(ActivityComponent component);
 }

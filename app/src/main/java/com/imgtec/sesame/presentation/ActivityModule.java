@@ -29,27 +29,37 @@
  *
  */
 
-// Top-level build file where you can add configuration options common to all sub-projects/modules.
+package com.imgtec.sesame.presentation;
 
-buildscript {
-    repositories {
-        jcenter()
-    }
-    dependencies {
-        classpath 'com.android.tools.build:gradle:2.3.0-beta1'
-        classpath 'com.neenbedankt.gradle.plugins:android-apt:1.8'
+import com.imgtec.di.PerActivity;
 
-        // NOTE: Do not place your application dependencies here; they belong
-        // in the individual module build.gradle files
-    }
-}
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-allprojects {
-    repositories {
-        jcenter()
-    }
-}
+import dagger.Module;
+import dagger.Provides;
 
-task clean(type: Delete) {
-    delete rootProject.buildDir
+/**
+ *
+ */
+@Module
+final class ActivityModule {
+
+  private final BaseActivity activity;
+
+  public ActivityModule(BaseActivity activity) {
+    this.activity = activity;
+  }
+
+  @Provides
+  @PerActivity
+  Logger providesLogger() {
+    return LoggerFactory.getLogger(activity.getClass().getSimpleName());
+  }
+
+  @Provides
+  BaseActivity provideActivity() {
+    return activity;
+  }
+
 }

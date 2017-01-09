@@ -29,27 +29,29 @@
  *
  */
 
-// Top-level build file where you can add configuration options common to all sub-projects/modules.
+package com.imgtec.sesame.app;
 
-buildscript {
-    repositories {
-        jcenter()
-    }
-    dependencies {
-        classpath 'com.android.tools.build:gradle:2.3.0-beta1'
-        classpath 'com.neenbedankt.gradle.plugins:android-apt:1.8'
+import android.app.Application;
 
-        // NOTE: Do not place your application dependencies here; they belong
-        // in the individual module build.gradle files
-    }
-}
+import com.imgtec.di.HasComponent;
 
-allprojects {
-    repositories {
-        jcenter()
-    }
-}
+/**
+ *
+ */
+public class App extends Application implements HasComponent<ApplicationComponent> {
 
-task clean(type: Delete) {
-    delete rootProject.buildDir
+  private ApplicationComponent component;
+
+  @Override
+  public void onCreate() {
+    super.onCreate();
+
+    component = ApplicationComponent.Initializer.init(this);
+    component.inject(this);
+  }
+
+  @Override
+  public ApplicationComponent getComponent() {
+    return component;
+  }
 }
