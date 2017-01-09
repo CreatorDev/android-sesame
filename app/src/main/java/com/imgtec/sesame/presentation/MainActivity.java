@@ -39,6 +39,7 @@ import android.view.MenuItem;
 
 import com.imgtec.sesame.R;
 
+
 import javax.inject.Inject;
 
 public class MainActivity extends BaseActivity {
@@ -51,6 +52,7 @@ public class MainActivity extends BaseActivity {
     setContentView(R.layout.activity_main);
     Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
     setSupportActionBar(toolbar);
+
   }
 
   @Override
