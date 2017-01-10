@@ -98,6 +98,9 @@ public class MainFragment extends BaseFragment {
     if (preferences.getConfiguration() == null) {
       showConfigurationDialog();
     }
+    else {
+      syncWithWebapp();
+    }
   }
 
   private void showConfigurationDialog() {
@@ -153,4 +156,9 @@ public class MainFragment extends BaseFragment {
     configurationDialog = builder.create();
     configurationDialog.show();
   }
+
+  private void syncWithWebapp() {
+    dataService.performSync();
+  }
+
 }

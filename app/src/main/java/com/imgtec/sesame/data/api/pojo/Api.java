@@ -29,12 +29,11 @@
  *
  */
 
-package com.imgtec.sesame.data;
+package com.imgtec.sesame.data.api.pojo;
 
 /**
  *
  */
-public interface DataService {
+public class Api extends Hateoas {
 
-  void performSync();
 }

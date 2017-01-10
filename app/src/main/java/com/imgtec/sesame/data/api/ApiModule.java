@@ -34,6 +34,7 @@ package com.imgtec.sesame.data.api;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.imgtec.di.PerApp;
+import com.imgtec.sesame.BuildConfig;
 import com.imgtec.sesame.app.App;
 import com.imgtec.sesame.data.Preferences;
 
@@ -86,16 +87,19 @@ public class ApiModule {
     HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor();
     loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
 
-    OkHttpClient okHttpClient = new OkHttpClient
+    OkHttpClient.Builder okHttpClientBuilder = new OkHttpClient
         .Builder()
         .cache(cache)
-        .addInterceptor(loggingInterceptor)
         .addInterceptor(oauthInterceptor)
         .connectTimeout(10, TimeUnit.SECONDS)
         .writeTimeout(10, TimeUnit.SECONDS)
-        .readTimeout(30, TimeUnit.SECONDS)
-        .build();
-    return okHttpClient;
+        .readTimeout(30, TimeUnit.SECONDS);
+
+    if (BuildConfig.DEBUG) {
+        okHttpClientBuilder.addInterceptor(loggingInterceptor);
+    }
+
+    return okHttpClientBuilder.build();
   }
 
   @Provides

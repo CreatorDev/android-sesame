@@ -39,6 +39,7 @@ import android.support.annotation.NonNull;
 
 import com.imgtec.di.PerApp;
 import com.imgtec.sesame.app.App;
+import com.imgtec.sesame.data.api.HostWrapper;
 import com.imgtec.sesame.data.api.RestApiService;
 
 
@@ -77,8 +78,9 @@ public class DataModule {
   DataService provideDataService(@NonNull App application,
                                  @NonNull ScheduledExecutorService executorService,
                                  @NonNull @Named("Main") Handler handler,
+                                 @NonNull HostWrapper hostWrapper,
                                  @NonNull RestApiService apiService) {
 
-    return new DataServiceImpl();
+    return new DataServiceImpl(executorService, handler, hostWrapper, apiService);
   }
 }

@@ -29,12 +29,44 @@
  *
  */
 
-package com.imgtec.sesame.data;
+package com.imgtec.sesame.data.api.pojo;
+
+import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  *
  */
-public interface DataService {
+public class Hateoas {
 
-  void performSync();
+  @SerializedName("links")
+  @Expose
+  private List<Link> links = new ArrayList<Link>();
+
+  private Map<String, Link> linksMap = new HashMap<>();
+
+  public List<Link> getLinks() {
+    return links;
+  }
+
+  public void setLinks(List<Link> links) {
+    this.links = links;
+  }
+
+  public Link getLinkByRel(String rel) {
+    if (links.isEmpty()) {
+      return null;
+    }
+    if (links.isEmpty() == false && linksMap.isEmpty()) {
+      for (Link link : links) {
+        linksMap.put(link.getRel(), link);
+      }
+    }
+    return linksMap.get(rel);
+  }
 }

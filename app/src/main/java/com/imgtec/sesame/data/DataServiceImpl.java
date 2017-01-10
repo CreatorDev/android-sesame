@@ -31,8 +31,20 @@
 
 package com.imgtec.sesame.data;
 
+import android.os.Handler;
+
+import com.imgtec.sesame.data.api.HostWrapper;
+import com.imgtec.sesame.data.api.RestApiService;
+import com.imgtec.sesame.data.api.pojo.Api;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.concurrent.ScheduledExecutorService;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 /**
  *
@@ -41,7 +53,35 @@ public class DataServiceImpl implements DataService {
 
   private final Logger logger = LoggerFactory.getLogger(getClass().getSimpleName());
 
-  DataServiceImpl() {
+  private final ScheduledExecutorService executor;
+  private final Handler handler;
+  private final HostWrapper hostWrapper;
+  private final RestApiService apiService;
 
+  public DataServiceImpl(ScheduledExecutorService executorService,
+                         Handler handler,
+                         HostWrapper hostWrapper,
+                         RestApiService apiService) {
+    super();
+    this.executor = executorService;
+    this.handler = handler;
+    this.hostWrapper = hostWrapper;
+    this.apiService = apiService;
+  }
+
+  @Override
+  public void performSync() {
+    Call<Api> api = apiService.api(hostWrapper.getHost());
+    api.enqueue(new Callback<Api>() {
+      @Override
+      public void onResponse(Call<Api> call, Response<Api> response) {
+
+      }
+
+      @Override
+      public void onFailure(Call<Api> call, Throwable t) {
+
+      }
+    });
   }
 }

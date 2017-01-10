@@ -31,8 +31,17 @@
 
 package com.imgtec.sesame.data.api;
 
+import com.imgtec.sesame.data.api.pojo.Api;
+
+import retrofit2.Call;
+import retrofit2.http.GET;
+import retrofit2.http.Url;
+
 /**
  *
  */
 public interface RestApiService {
+
+  @GET
+  Call<Api> api(@Url String url);
 }
