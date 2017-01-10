@@ -32,7 +32,6 @@
 package com.imgtec.sesame.presentation;
 
 
-import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
@@ -44,10 +43,10 @@ import android.widget.Toast;
 import com.imgtec.di.HasComponent;
 import com.imgtec.sesame.R;
 import com.imgtec.sesame.data.Configuration;
-import com.imgtec.sesame.data.api.CredentialsWrapper;
 import com.imgtec.sesame.data.DataService;
-import com.imgtec.sesame.data.api.HostWrapper;
 import com.imgtec.sesame.data.Preferences;
+import com.imgtec.sesame.data.api.CredentialsWrapper;
+import com.imgtec.sesame.data.api.HostWrapper;
 
 import javax.inject.Inject;
 
@@ -118,43 +117,37 @@ public class MainFragment extends BaseFragment {
     builder
         .setTitle(R.string.enter_credentials)
         .setView(dialogView)
-        .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
-          @Override
-          public void onClick(DialogInterface dialog, int which) {
-            dialog.dismiss();
-            configurationDialog = null;
-          }
+        .setNegativeButton(R.string.cancel, (dialog, which) -> {
+          dialog.dismiss();
+          configurationDialog = null;
         })
-        .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
-          @Override
-          public void onClick(DialogInterface dialog, int which) {
+        .setPositiveButton(R.string.ok, (dialog, which) -> {
 
-            String hostStr = host.getText().toString();
-            String secretStr = secret.getText().toString();
+          String hostStr = host.getText().toString();
+          String secretStr = secret.getText().toString();
 
-            if (hostStr == null || hostStr.isEmpty() ||
-                secretStr == null || secretStr.isEmpty()) {
-              Toast.makeText(getContext(), "Host or secret is missing", Toast.LENGTH_LONG).show();
-              return;
-            }
-
-
-            final String token = Jwts.builder()
-                .setSubject("Subject")
-                .signWith(SignatureAlgorithm.HS256, secretStr.getBytes())
-                .compact();
-
-            Configuration configuration = new Configuration(hostStr, secretStr, token);
-            preferences.saveConfiguration(configuration);
-
-            //update wrapper
-            hostWrapper.setHost(hostStr);
-            credentialsWrapper.setSecret(secretStr);
-            credentialsWrapper.setToken(token);
-
-            dialog.dismiss();
-            configurationDialog = null;
+          if (hostStr == null || hostStr.isEmpty() ||
+              secretStr == null || secretStr.isEmpty()) {
+            Toast.makeText(getContext(), "Host or secret is missing", Toast.LENGTH_LONG).show();
+            return;
           }
+
+
+          final String token = Jwts.builder()
+              .setSubject("Subject")
+              .signWith(SignatureAlgorithm.HS256, secretStr.getBytes())
+              .compact();
+
+          Configuration configuration1 = new Configuration(hostStr, secretStr, token);
+          preferences.saveConfiguration(configuration1);
+
+          //update wrapper
+          hostWrapper.setHost(hostStr);
+          credentialsWrapper.setSecret(secretStr);
+          credentialsWrapper.setToken(token);
+
+          dialog.dismiss();
+          configurationDialog = null;
         });
 
     configurationDialog = builder.create();
