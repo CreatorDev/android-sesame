@@ -34,7 +34,6 @@ package com.imgtec.sesame.presentation;
 
 import android.content.DialogInterface;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -45,6 +44,9 @@ import android.widget.Toast;
 import com.imgtec.di.HasComponent;
 import com.imgtec.sesame.R;
 import com.imgtec.sesame.data.Configuration;
+import com.imgtec.sesame.data.api.CredentialsWrapper;
+import com.imgtec.sesame.data.DataService;
+import com.imgtec.sesame.data.api.HostWrapper;
 import com.imgtec.sesame.data.Preferences;
 
 import javax.inject.Inject;
@@ -52,14 +54,15 @@ import javax.inject.Inject;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 
-import static java.util.ResourceBundle.clearCache;
-
 /**
  *
  */
 public class MainFragment extends BaseFragment {
 
   @Inject Preferences preferences;
+  @Inject DataService dataService;
+  @Inject HostWrapper hostWrapper;
+  @Inject CredentialsWrapper credentialsWrapper;
 
   private AlertDialog configurationDialog;
 
@@ -144,10 +147,10 @@ public class MainFragment extends BaseFragment {
             Configuration configuration = new Configuration(hostStr, secretStr, token);
             preferences.saveConfiguration(configuration);
 
-            //TODO: update wrapper
-
-
-            clearCache();
+            //update wrapper
+            hostWrapper.setHost(hostStr);
+            credentialsWrapper.setSecret(secretStr);
+            credentialsWrapper.setToken(token);
 
             dialog.dismiss();
             configurationDialog = null;
@@ -156,10 +159,5 @@ public class MainFragment extends BaseFragment {
 
     configurationDialog = builder.create();
     configurationDialog.show();
-  }
-
-
-  private void clearCache() {
-    //TODO: implement
   }
 }

@@ -31,22 +31,28 @@
 
 package com.imgtec.sesame.app;
 
-import android.app.Activity;
 import android.content.SharedPreferences;
 import android.os.Handler;
 
 import com.imgtec.di.PerApp;
+import com.imgtec.sesame.data.api.CredentialsWrapper;
 import com.imgtec.sesame.data.DataModule;
+import com.imgtec.sesame.data.DataService;
+import com.imgtec.sesame.data.api.HostWrapper;
+import com.imgtec.sesame.data.api.ApiModule;
+import com.imgtec.sesame.data.api.RestApiService;
 
 import javax.inject.Named;
 
 import dagger.Component;
+import okhttp3.OkHttpClient;
 
 @PerApp
 @Component(
     modules = {
         ApplicationModule.class,
-        DataModule.class
+        DataModule.class,
+        ApiModule.class
     }
 )
 public interface ApplicationComponent {
@@ -69,6 +75,16 @@ public interface ApplicationComponent {
   SharedPreferences getSharedPreferences();
 
   @Named("Main") Handler getHandler();
+
+  HostWrapper getHostWrapper();
+
+  CredentialsWrapper getCredentialsWrapper();
+
+  DataService getDataService();
+
+  OkHttpClient getOkHttpClient();
+
+  RestApiService getRestApiService();
 
 }
 

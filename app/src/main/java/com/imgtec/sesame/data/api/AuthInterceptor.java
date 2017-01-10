@@ -29,56 +29,36 @@
  *
  */
 
-package com.imgtec.sesame.data;
-
-import android.content.Context;
-import android.content.SharedPreferences;
-import android.os.Handler;
-import android.provider.Settings;
-import android.support.annotation.NonNull;
+package com.imgtec.sesame.data.api;
 
 import com.imgtec.di.PerApp;
-import com.imgtec.sesame.app.App;
-import com.imgtec.sesame.data.api.RestApiService;
 
+import java.io.IOException;
 
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-
-import javax.inject.Named;
-
-import dagger.Module;
-import dagger.Provides;
+import okhttp3.Interceptor;
+import okhttp3.Request;
+import okhttp3.Response;
 
 /**
  *
  */
-@Module
-public class DataModule {
+@PerApp
+public final class AuthInterceptor implements Interceptor {
 
-  static final String PREFS = "data";
+  private final CredentialsWrapper credentials;
 
-  @Provides @PerApp
-  SharedPreferences provideSharedPreferences(App application) {
-    return application.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
+  AuthInterceptor(final CredentialsWrapper credentials) {
+    super();
+    this.credentials = credentials;
   }
 
-  @Provides @PerApp
-  Preferences providesPreferences(@NonNull final SharedPreferences prefs) {
-    return new Preferences(prefs);
-  }
+  @Override public Response intercept(Chain chain) throws IOException {
 
-  @Provides @PerApp
-  ScheduledExecutorService provideScheduleExecutorService() {
-    return Executors.newScheduledThreadPool(4);
-  }
+    Request.Builder builder = chain.request().newBuilder();
+    if (credentials.getToken() != null && !credentials.getToken().isEmpty()) {
+      builder.addHeader("x-access-token", credentials.getToken());
+    }
 
-  @Provides @PerApp
-  DataService provideDataService(@NonNull App application,
-                                 @NonNull ScheduledExecutorService executorService,
-                                 @NonNull @Named("Main") Handler handler,
-                                 @NonNull RestApiService apiService) {
-
-    return new DataServiceImpl();
+    return chain.proceed(builder.build());
   }
 }

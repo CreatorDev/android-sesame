@@ -29,56 +29,35 @@
  *
  */
 
-package com.imgtec.sesame.data;
-
-import android.content.Context;
-import android.content.SharedPreferences;
-import android.os.Handler;
-import android.provider.Settings;
-import android.support.annotation.NonNull;
-
-import com.imgtec.di.PerApp;
-import com.imgtec.sesame.app.App;
-import com.imgtec.sesame.data.api.RestApiService;
+package com.imgtec.sesame.data.api;
 
 
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
+import com.imgtec.sesame.data.Configuration;
 
-import javax.inject.Named;
+public class CredentialsWrapper {
 
-import dagger.Module;
-import dagger.Provides;
+  private String secret;
+  private String token;
 
-/**
- *
- */
-@Module
-public class DataModule {
+  public CredentialsWrapper(Configuration configuration) {
 
-  static final String PREFS = "data";
-
-  @Provides @PerApp
-  SharedPreferences provideSharedPreferences(App application) {
-    return application.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
+    this.secret = configuration != null ? configuration.getSecret() : "";
+    this.token = configuration != null ? configuration.getToken() : "";
   }
 
-  @Provides @PerApp
-  Preferences providesPreferences(@NonNull final SharedPreferences prefs) {
-    return new Preferences(prefs);
+  public String getSecret() {
+    return secret;
   }
 
-  @Provides @PerApp
-  ScheduledExecutorService provideScheduleExecutorService() {
-    return Executors.newScheduledThreadPool(4);
+  public void setSecret(String secret) {
+    this.secret = secret;
   }
 
-  @Provides @PerApp
-  DataService provideDataService(@NonNull App application,
-                                 @NonNull ScheduledExecutorService executorService,
-                                 @NonNull @Named("Main") Handler handler,
-                                 @NonNull RestApiService apiService) {
+  public String getToken() {
+    return token;
+  }
 
-    return new DataServiceImpl();
+  public void setToken(String token) {
+    this.token = token;
   }
 }

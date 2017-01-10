@@ -31,54 +31,17 @@
 
 package com.imgtec.sesame.data;
 
-import android.content.Context;
-import android.content.SharedPreferences;
-import android.os.Handler;
-import android.provider.Settings;
-import android.support.annotation.NonNull;
-
-import com.imgtec.di.PerApp;
-import com.imgtec.sesame.app.App;
-import com.imgtec.sesame.data.api.RestApiService;
-
-
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-
-import javax.inject.Named;
-
-import dagger.Module;
-import dagger.Provides;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
  */
-@Module
-public class DataModule {
+public class DataServiceImpl implements DataService {
 
-  static final String PREFS = "data";
+  private final Logger logger = LoggerFactory.getLogger(getClass().getSimpleName());
 
-  @Provides @PerApp
-  SharedPreferences provideSharedPreferences(App application) {
-    return application.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
-  }
+  DataServiceImpl() {
 
-  @Provides @PerApp
-  Preferences providesPreferences(@NonNull final SharedPreferences prefs) {
-    return new Preferences(prefs);
-  }
-
-  @Provides @PerApp
-  ScheduledExecutorService provideScheduleExecutorService() {
-    return Executors.newScheduledThreadPool(4);
-  }
-
-  @Provides @PerApp
-  DataService provideDataService(@NonNull App application,
-                                 @NonNull ScheduledExecutorService executorService,
-                                 @NonNull @Named("Main") Handler handler,
-                                 @NonNull RestApiService apiService) {
-
-    return new DataServiceImpl();
   }
 }

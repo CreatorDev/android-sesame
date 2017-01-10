@@ -29,56 +29,25 @@
  *
  */
 
-package com.imgtec.sesame.data;
+package com.imgtec.sesame.data.api;
 
-import android.content.Context;
-import android.content.SharedPreferences;
-import android.os.Handler;
-import android.provider.Settings;
-import android.support.annotation.NonNull;
-
-import com.imgtec.di.PerApp;
-import com.imgtec.sesame.app.App;
-import com.imgtec.sesame.data.api.RestApiService;
-
-
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-
-import javax.inject.Named;
-
-import dagger.Module;
-import dagger.Provides;
+import com.imgtec.sesame.data.Configuration;
 
 /**
  *
  */
-@Module
-public class DataModule {
+public class HostWrapper {
+  private String host;
 
-  static final String PREFS = "data";
-
-  @Provides @PerApp
-  SharedPreferences provideSharedPreferences(App application) {
-    return application.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
+  public HostWrapper(Configuration configuration) {
+    this.host = configuration != null ? configuration.getHost() : "";
   }
 
-  @Provides @PerApp
-  Preferences providesPreferences(@NonNull final SharedPreferences prefs) {
-    return new Preferences(prefs);
+  public void setHost(String host) {
+    this.host = host;
   }
 
-  @Provides @PerApp
-  ScheduledExecutorService provideScheduleExecutorService() {
-    return Executors.newScheduledThreadPool(4);
-  }
-
-  @Provides @PerApp
-  DataService provideDataService(@NonNull App application,
-                                 @NonNull ScheduledExecutorService executorService,
-                                 @NonNull @Named("Main") Handler handler,
-                                 @NonNull RestApiService apiService) {
-
-    return new DataServiceImpl();
+  public String getHost() {
+    return host;
   }
 }
