@@ -29,57 +29,49 @@
  *
  */
 
-package com.imgtec.sesame.data.api;
+package com.imgtec.sesame.data.api.pojo;
 
-import com.imgtec.sesame.data.api.pojo.Api;
-import com.imgtec.sesame.data.api.pojo.DoorsAction;
-import com.imgtec.sesame.data.api.pojo.DoorsState;
-import com.imgtec.sesame.data.api.pojo.DoorsEntrypoint;
-import com.imgtec.sesame.data.api.pojo.DoorsStatistics;
-import com.imgtec.sesame.data.api.pojo.Logs;
-
-import retrofit2.Call;
-import retrofit2.http.DELETE;
-import retrofit2.http.GET;
-import retrofit2.http.PUT;
-import retrofit2.http.Query;
-import retrofit2.http.Url;
+import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
 
 /**
  *
  */
-public interface RestApiService {
+public class StatsEntry {
 
-  @GET
-  Call<Api> api(@Url String url);
+  @SerializedName("min")
+  @Expose
+  private Integer min;
 
-  @GET
-  Call<DoorsEntrypoint> entrypoint(@Url String url);
+  @SerializedName("max")
+  @Expose
+  private Integer max;
 
-  @GET
-  Call<DoorsState> state(@Url String url);
+  @SerializedName("avg")
+  @Expose
+  private Integer avg;
 
-  @PUT
-  Call<Void> operate(@Url String url);
+  public Integer getMin() {
+    return min;
+  }
 
-  @PUT
-  Call<DoorsAction> open(@Url String url);
+  public void setMin(Integer min) {
+    this.min = min;
+  }
 
-  @PUT
-  Call<DoorsAction> close(@Url String url);
+  public Integer getMax() {
+    return max;
+  }
 
-  @PUT
-  Call<Void> resetOpenCounter(@Url String url);
+  public void setMax(Integer max) {
+    this.max = max;
+  }
 
-  @PUT
-  Call<Void> resetCloseCounter(@Url String url);
+  public Integer getAvg() {
+    return avg;
+  }
 
-  @GET
-  Call<DoorsStatistics> statistics(@Url String url);
-
-  @DELETE
-  Call<Void> deleteStatistics(@Url String url);
-
-  @GET
-  Call<Logs> logs(@Url String url, @Query("pageSize") Integer pageSize, @Query("startIndex") Integer startIndex);
+  public void setAvg(Integer avg) {
+    this.avg = avg;
+  }
 }

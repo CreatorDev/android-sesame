@@ -36,6 +36,9 @@ import android.os.Handler;
 import com.imgtec.sesame.data.api.HostWrapper;
 import com.imgtec.sesame.data.api.RestApiService;
 import com.imgtec.sesame.data.api.pojo.Api;
+import com.imgtec.sesame.data.api.pojo.DoorsEntrypoint;
+import com.imgtec.sesame.data.api.pojo.DoorsStatistics;
+import com.imgtec.sesame.data.api.pojo.Logs;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -76,6 +79,60 @@ public class DataServiceImpl implements DataService {
       @Override
       public void onResponse(Call<Api> call, Response<Api> response) {
 
+        String doorsUrl = response.body().getLinkByRel("doors").getHref();
+        Call<DoorsEntrypoint> doorsEndpoints = apiService.entrypoint(doorsUrl);
+        doorsEndpoints.enqueue(new Callback<DoorsEntrypoint>() {
+          @Override
+          public void onResponse(Call<DoorsEntrypoint> call, Response<DoorsEntrypoint> response) {
+
+            final DoorsEntrypoint ep = response.body();
+            String operateUrl = ep.getLinkByRel("operate").getHref();
+            apiService.operate(operateUrl).enqueue(new Callback<Void>() {
+              @Override
+              public void onResponse(Call<Void> call, Response<Void> response) {
+
+              }
+
+              @Override
+              public void onFailure(Call<Void> call, Throwable t) {
+
+              }
+            });
+
+            String statsUrl = ep.getLinkByRel("stats").getHref();;
+            apiService.statistics(statsUrl).enqueue(new Callback<DoorsStatistics>() {
+              @Override
+              public void onResponse(Call<DoorsStatistics> call, Response<DoorsStatistics> response) {
+
+              }
+
+              @Override
+              public void onFailure(Call<DoorsStatistics> call, Throwable t) {
+
+              }
+            });
+
+            String logsUrl = ep.getLinkByRel("logs").getHref();
+            apiService.logs(logsUrl, null, null).enqueue(new Callback<Logs>() {
+              @Override
+              public void onResponse(Call<Logs> call, Response<Logs> response) {
+
+              }
+
+              @Override
+              public void onFailure(Call<Logs> call, Throwable t) {
+
+              }
+            });
+          }
+
+          @Override
+          public void onFailure(Call<DoorsEntrypoint> call, Throwable t) {
+
+          }
+        });
+
+
       }
 
       @Override
@@ -83,5 +140,7 @@ public class DataServiceImpl implements DataService {
 
       }
     });
+
+
   }
 }

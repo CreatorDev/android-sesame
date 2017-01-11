@@ -29,57 +29,50 @@
  *
  */
 
-package com.imgtec.sesame.data.api;
+package com.imgtec.sesame.data.api.pojo;
 
-import com.imgtec.sesame.data.api.pojo.Api;
-import com.imgtec.sesame.data.api.pojo.DoorsAction;
-import com.imgtec.sesame.data.api.pojo.DoorsState;
-import com.imgtec.sesame.data.api.pojo.DoorsEntrypoint;
-import com.imgtec.sesame.data.api.pojo.DoorsStatistics;
-import com.imgtec.sesame.data.api.pojo.Logs;
-
-import retrofit2.Call;
-import retrofit2.http.DELETE;
-import retrofit2.http.GET;
-import retrofit2.http.PUT;
-import retrofit2.http.Query;
-import retrofit2.http.Url;
+import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
 
 /**
- *
+ * Created by krzysztof.kocon on 11/01/2017.
  */
-public interface RestApiService {
 
-  @GET
-  Call<Api> api(@Url String url);
+public class DoorsStatistics extends Hateoas {
 
-  @GET
-  Call<DoorsEntrypoint> entrypoint(@Url String url);
+  @SerializedName("since")
+  @Expose
+  private String since;
 
-  @GET
-  Call<DoorsState> state(@Url String url);
+  @SerializedName("opening")
+  @Expose
+  private StatsEntry opening;
 
-  @PUT
-  Call<Void> operate(@Url String url);
+  @SerializedName("closing")
+  @Expose
+  private StatsEntry closing;
 
-  @PUT
-  Call<DoorsAction> open(@Url String url);
+  public String getSince() {
+    return since;
+  }
 
-  @PUT
-  Call<DoorsAction> close(@Url String url);
+  public void setSince(String since) {
+    this.since = since;
+  }
 
-  @PUT
-  Call<Void> resetOpenCounter(@Url String url);
+  public StatsEntry getOpening() {
+    return opening;
+  }
 
-  @PUT
-  Call<Void> resetCloseCounter(@Url String url);
+  public void setOpening(StatsEntry opening) {
+    this.opening = opening;
+  }
 
-  @GET
-  Call<DoorsStatistics> statistics(@Url String url);
+  public StatsEntry getClosing() {
+    return closing;
+  }
 
-  @DELETE
-  Call<Void> deleteStatistics(@Url String url);
-
-  @GET
-  Call<Logs> logs(@Url String url, @Query("pageSize") Integer pageSize, @Query("startIndex") Integer startIndex);
+  public void setClosing(StatsEntry closing) {
+    this.closing = closing;
+  }
 }

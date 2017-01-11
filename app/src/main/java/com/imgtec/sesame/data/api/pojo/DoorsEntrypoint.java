@@ -29,57 +29,10 @@
  *
  */
 
-package com.imgtec.sesame.data.api;
-
-import com.imgtec.sesame.data.api.pojo.Api;
-import com.imgtec.sesame.data.api.pojo.DoorsAction;
-import com.imgtec.sesame.data.api.pojo.DoorsState;
-import com.imgtec.sesame.data.api.pojo.DoorsEntrypoint;
-import com.imgtec.sesame.data.api.pojo.DoorsStatistics;
-import com.imgtec.sesame.data.api.pojo.Logs;
-
-import retrofit2.Call;
-import retrofit2.http.DELETE;
-import retrofit2.http.GET;
-import retrofit2.http.PUT;
-import retrofit2.http.Query;
-import retrofit2.http.Url;
+package com.imgtec.sesame.data.api.pojo;
 
 /**
  *
  */
-public interface RestApiService {
-
-  @GET
-  Call<Api> api(@Url String url);
-
-  @GET
-  Call<DoorsEntrypoint> entrypoint(@Url String url);
-
-  @GET
-  Call<DoorsState> state(@Url String url);
-
-  @PUT
-  Call<Void> operate(@Url String url);
-
-  @PUT
-  Call<DoorsAction> open(@Url String url);
-
-  @PUT
-  Call<DoorsAction> close(@Url String url);
-
-  @PUT
-  Call<Void> resetOpenCounter(@Url String url);
-
-  @PUT
-  Call<Void> resetCloseCounter(@Url String url);
-
-  @GET
-  Call<DoorsStatistics> statistics(@Url String url);
-
-  @DELETE
-  Call<Void> deleteStatistics(@Url String url);
-
-  @GET
-  Call<Logs> logs(@Url String url, @Query("pageSize") Integer pageSize, @Query("startIndex") Integer startIndex);
+public class DoorsEntrypoint extends Hateoas {
 }
