@@ -40,6 +40,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import com.imgtec.sesame.R;
+import com.imgtec.sesame.presentation.fragments.MainFragment;
 
 
 import javax.inject.Inject;

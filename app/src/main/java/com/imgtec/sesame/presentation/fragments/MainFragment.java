@@ -29,15 +29,19 @@
  *
  */
 
-package com.imgtec.sesame.presentation;
+package com.imgtec.sesame.presentation.fragments;
 
 
+import android.content.Context;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
+import android.support.v4.app.FragmentTabHost;
 import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.imgtec.di.HasComponent;
@@ -47,9 +51,11 @@ import com.imgtec.sesame.data.DataService;
 import com.imgtec.sesame.data.Preferences;
 import com.imgtec.sesame.data.api.CredentialsWrapper;
 import com.imgtec.sesame.data.api.HostWrapper;
+import com.imgtec.sesame.presentation.ActivityComponent;
 
 import javax.inject.Inject;
 
+import butterknife.BindView;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 
@@ -63,7 +69,10 @@ public class MainFragment extends BaseFragment {
   @Inject HostWrapper hostWrapper;
   @Inject CredentialsWrapper credentialsWrapper;
 
+  @BindView(R.id.tab_host) FragmentTabHost tabHost;
+
   private AlertDialog configurationDialog;
+
 
   public MainFragment() {
     // Required empty public constructor
@@ -77,14 +86,33 @@ public class MainFragment extends BaseFragment {
   @Override
   public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
-
   }
 
   @Override
   public View onCreateView(LayoutInflater inflater, ViewGroup container,
                            Bundle savedInstanceState) {
-    // Inflate the layout for this fragment
     return inflater.inflate(R.layout.fragment_main, container, false);
+  }
+
+  @Override
+  public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+    super.onViewCreated(view, savedInstanceState);
+
+    tabHost.setup(getActivity(), getChildFragmentManager(), android.R.id.tabcontent);
+
+    tabHost.addTab(tabHost.newTabSpec("controller").setIndicator(getTabIndicator(getContext(), "controller")),
+        ControllerFragment.class, null);
+    tabHost.addTab(tabHost.newTabSpec("statistics").setIndicator(getTabIndicator(getContext(), "statistics")),
+        StatisticsFragment.class, null);
+    tabHost.addTab(tabHost.newTabSpec("logs").setIndicator(getTabIndicator(getContext(), "logs")),
+        LogsFragment.class, null);
+  }
+
+  private View getTabIndicator(Context context, String title) {
+    View view = LayoutInflater.from(context).inflate(R.layout.tab_layout, null);
+    TextView tv = (TextView) view.findViewById(R.id.tab_title);
+    tv.setText(title);
+    return view;
   }
 
   @Override

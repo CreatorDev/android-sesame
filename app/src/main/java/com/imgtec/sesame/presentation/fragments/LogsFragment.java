@@ -29,39 +29,41 @@
  *
  */
 
-package com.imgtec.sesame.presentation;
-
-import com.imgtec.di.HasComponent;
-import com.imgtec.di.PerActivity;
-import com.imgtec.sesame.app.ApplicationComponent;
-import com.imgtec.sesame.presentation.fragments.MainFragment;
-
-import dagger.Component;
-
-@PerActivity
-@Component(
-    dependencies = ApplicationComponent.class,
-    modules = {
-        ActivityModule.class
-    }
-)
-public interface ActivityComponent {
+package com.imgtec.sesame.presentation.fragments;
 
 
-  class Initializer {
+import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 
-    private Initializer() {}
+import com.imgtec.sesame.R;
 
-    static ActivityComponent init(BaseActivity activity) {
-      return DaggerActivityComponent
-          .builder()
-          .applicationComponent(((HasComponent<ApplicationComponent>) activity.getApplicationContext()).getComponent())
-          .activityModule(new ActivityModule(activity))
-          .build();
-    }
+/**
+ *
+ */
+public class LogsFragment extends Fragment {
+
+  public LogsFragment() {
+    // Required empty public constructor
   }
 
-  void inject(MainActivity activity);
-  void inject(MainFragment fragment);
+  public static LogsFragment newInstance(String param1, String param2) {
+    LogsFragment fragment = new LogsFragment();
+    return fragment;
+  }
+
+  @Override
+  public void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+  }
+
+  @Override
+  public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                           Bundle savedInstanceState) {
+    // Inflate the layout for this fragment
+    return inflater.inflate(R.layout.fragment_logs, container, false);
+  }
 
 }

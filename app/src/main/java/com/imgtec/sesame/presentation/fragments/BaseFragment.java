@@ -29,7 +29,7 @@
  *
  */
 
-package com.imgtec.sesame.presentation;
+package com.imgtec.sesame.presentation.fragments;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
