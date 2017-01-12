@@ -29,44 +29,65 @@
  *
  */
 
-package com.imgtec.sesame.presentation;
+package com.imgtec.sesame.presentation.adapters;
 
-import com.imgtec.di.HasComponent;
-import com.imgtec.di.PerActivity;
-import com.imgtec.sesame.app.ApplicationComponent;
-import com.imgtec.sesame.presentation.fragments.ControllerFragment;
-import com.imgtec.sesame.presentation.fragments.LogsFragment;
-import com.imgtec.sesame.presentation.fragments.MainFragment;
-import com.imgtec.sesame.presentation.fragments.StatisticsFragment;
+import android.support.v7.widget.RecyclerView;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.TextView;
 
-import dagger.Component;
+import com.imgtec.sesame.R;
+import com.imgtec.sesame.data.api.pojo.Log;
 
-@PerActivity
-@Component(
-    dependencies = ApplicationComponent.class,
-    modules = {
-        ActivityModule.class
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
+/**
+ *
+ */
+
+public class LogsAdapter extends BaseAdapter<LogsAdapter.LogItem, LogsAdapter.ViewHolder> {
+
+
+  @Override
+  public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    final View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.log_item, parent, false);
+    return new ViewHolder(v);
+  }
+
+  @Override
+  public void onBindViewHolder(ViewHolder holder, int position) {
+    LogItem item = getItem(position);
+    holder.action.setText(item.getAction());
+    holder.timestamp.setText(item.getTimestamp());
+  }
+
+  public static class LogItem {
+
+    private final Log log;
+
+    public LogItem(Log log) {
+      this.log = log;
     }
-)
-public interface ActivityComponent {
 
-  class Initializer {
+    String getAction() {
+      return log.getAction();
+    }
 
-    private Initializer() {}
-
-    static ActivityComponent init(BaseActivity activity) {
-      return DaggerActivityComponent
-          .builder()
-          .applicationComponent(((HasComponent<ApplicationComponent>) activity.getApplicationContext()).getComponent())
-          .activityModule(new ActivityModule(activity))
-          .build();
+    String getTimestamp() {
+      return log.getDate();
     }
   }
 
-  void inject(MainActivity activity);
-  void inject(MainFragment fragment);
-  void inject(StatisticsFragment fragment);
-  void inject(ControllerFragment fragment);
-  void inject(LogsFragment fragment);
+  static class ViewHolder extends RecyclerView.ViewHolder {
 
+    @BindView(R.id.action) TextView action;
+    @BindView(R.id.timestamp) TextView timestamp;
+
+    public ViewHolder(View itemView) {
+      super(itemView);
+      ButterKnife.bind(this, itemView);
+    }
+  }
 }

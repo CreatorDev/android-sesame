@@ -33,23 +33,24 @@ package com.imgtec.sesame.presentation.fragments;
 
 
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.imgtec.di.HasComponent;
 import com.imgtec.sesame.R;
+import com.imgtec.sesame.presentation.ActivityComponent;
 
 /**
  *
  */
-public class StatisticsFragment extends Fragment {
+public class StatisticsFragment extends BaseFragment {
 
   public StatisticsFragment() {
     // Required empty public constructor
   }
 
-  public static StatisticsFragment newInstance(String param1, String param2) {
+  public static StatisticsFragment newInstance() {
     StatisticsFragment fragment = new StatisticsFragment();
     return fragment;
   }
@@ -66,4 +67,8 @@ public class StatisticsFragment extends Fragment {
     return inflater.inflate(R.layout.fragment_statistics, container, false);
   }
 
+  @Override
+  protected void setComponent() {
+    ((HasComponent<ActivityComponent>) getActivity()).getComponent().inject(this);
+  }
 }

@@ -29,44 +29,12 @@
  *
  */
 
-package com.imgtec.sesame.presentation;
+package com.imgtec.sesame.data;
 
-import com.imgtec.di.HasComponent;
-import com.imgtec.di.PerActivity;
-import com.imgtec.sesame.app.ApplicationComponent;
-import com.imgtec.sesame.presentation.fragments.ControllerFragment;
-import com.imgtec.sesame.presentation.fragments.LogsFragment;
-import com.imgtec.sesame.presentation.fragments.MainFragment;
-import com.imgtec.sesame.presentation.fragments.StatisticsFragment;
-
-import dagger.Component;
-
-@PerActivity
-@Component(
-    dependencies = ApplicationComponent.class,
-    modules = {
-        ActivityModule.class
-    }
-)
-public interface ActivityComponent {
-
-  class Initializer {
-
-    private Initializer() {}
-
-    static ActivityComponent init(BaseActivity activity) {
-      return DaggerActivityComponent
-          .builder()
-          .applicationComponent(((HasComponent<ApplicationComponent>) activity.getApplicationContext()).getComponent())
-          .activityModule(new ActivityModule(activity))
-          .build();
-    }
-  }
-
-  void inject(MainActivity activity);
-  void inject(MainFragment fragment);
-  void inject(StatisticsFragment fragment);
-  void inject(ControllerFragment fragment);
-  void inject(LogsFragment fragment);
-
+/**
+ *
+ */
+public interface DataCallback<S, T> {
+  void onSuccess(S service, T result);
+  void onFailure(S service, Throwable t);
 }

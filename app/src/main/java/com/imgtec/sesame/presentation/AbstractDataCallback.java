@@ -31,42 +31,59 @@
 
 package com.imgtec.sesame.presentation;
 
-import com.imgtec.di.HasComponent;
-import com.imgtec.di.PerActivity;
-import com.imgtec.sesame.app.ApplicationComponent;
-import com.imgtec.sesame.presentation.fragments.ControllerFragment;
-import com.imgtec.sesame.presentation.fragments.LogsFragment;
-import com.imgtec.sesame.presentation.fragments.MainFragment;
-import com.imgtec.sesame.presentation.fragments.StatisticsFragment;
+import android.os.Handler;
 
-import dagger.Component;
+import com.imgtec.sesame.data.DataCallback;
+import com.imgtec.sesame.presentation.fragments.BaseFragment;
+import com.imgtec.sesame.utils.Condition;
 
-@PerActivity
-@Component(
-    dependencies = ApplicationComponent.class,
-    modules = {
-        ActivityModule.class
-    }
-)
-public interface ActivityComponent {
+import java.lang.ref.WeakReference;
 
-  class Initializer {
+/**
+ *
+ */
+public abstract class AbstractDataCallback<F extends BaseFragment, S,T>
+    implements DataCallback<S, T> {
 
-    private Initializer() {}
+  final Handler mainHandler;
+  WeakReference<F> fragment;
 
-    static ActivityComponent init(BaseActivity activity) {
-      return DaggerActivityComponent
-          .builder()
-          .applicationComponent(((HasComponent<ApplicationComponent>) activity.getApplicationContext()).getComponent())
-          .activityModule(new ActivityModule(activity))
-          .build();
-    }
+  public AbstractDataCallback(F fragment, Handler mainHandler) throws IllegalArgumentException {
+    super();
+    Condition.checkArgument(fragment != null, "Fragment cannot be null");
+    Condition.checkArgument(mainHandler != null, "Handler cannot be null");
+    this.fragment = new WeakReference<>(fragment);
+    this.mainHandler = mainHandler;
   }
 
-  void inject(MainActivity activity);
-  void inject(MainFragment fragment);
-  void inject(StatisticsFragment fragment);
-  void inject(ControllerFragment fragment);
-  void inject(LogsFragment fragment);
+  @Override
+  public void onSuccess(final S service, final T result) {
+    mainHandler.post(new Runnable() {
+      @Override
+      public void run() {
+        F f = fragment.get();
+        if (f != null && f.isAdded()) {
+          onSuccess(f, service, result);
+        }
+      }
+    });
+  }
 
+  @Override
+  public void onFailure(final S service, final Throwable t) {
+    mainHandler.post(new Runnable() {
+      @Override
+      public void run() {
+        F f = fragment.get();
+        if (f != null && f.isAdded()) {
+          onFailure(f, service, t);
+        }
+      }
+    });
+  }
+
+  protected abstract void onSuccess(F fragment, S service, T result);
+
+  protected abstract void onFailure(F fragment, S service, Throwable t);
 }
+

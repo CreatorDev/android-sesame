@@ -90,4 +90,14 @@
         <!-- Used for the background -->
         <item name="android:background">@android:color/white</item>
     </style>
+
+    <style name="AppTheme.ListItemTitle">
+        <item name="android:textColor">@color/text_primary</item>
+        <item name="android:textSize">@dimen/list_item_2_size</item>
+    </style>
+
+    <style name="AppTheme.DetailTitle">
+        <item name="android:textColor">@color/text_secondary</item>
+        <item name="android:textSize">@dimen/list_item_2_size</item>
+    </style>
 </resources>

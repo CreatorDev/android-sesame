@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <!--
   ~ <b>Copyright (c) 2017, Imagination Technologies Limited and/or its affiliated group companies
   ~  and/or licensors. </b>
@@ -29,15 +30,24 @@
   ~
   -->
 
-
-<android.support.v7.widget.RecyclerView
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:context="com.imgtec.sesame.presentation.fragments.LogsFragment"
-    android:id="@+id/recyclerView"
+    android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:paddingLeft="24dp"
-    android:paddingRight="24dp"
-    tools:listitem="@layout/log_item"/>
+    android:layout_height="wrap_content">
 
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/action"
+        tools:text="OPEN/CLOSE"
+        style="@style/AppTheme.ListItemTitle"/>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/timestamp"
+        tools:text="2017-01-11T13:33:26.133Z"
+        style="@style/AppTheme.DetailTitle"/>
+</LinearLayout>

@@ -1,5 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
 <!--
-  ~ <b>Copyright (c) 2017, Imagination Technologies Limited and/or its affiliated group companies
+  ~ <b>Copyright (c) 2016, Imagination Technologies Limited and/or its affiliated group companies
   ~  and/or licensors. </b>
   ~
   ~  All rights reserved.
@@ -29,15 +30,6 @@
   ~
   -->
 
-
-<android.support.v7.widget.RecyclerView
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    tools:context="com.imgtec.sesame.presentation.fragments.LogsFragment"
-    android:id="@+id/recyclerView"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:paddingLeft="24dp"
-    android:paddingRight="24dp"
-    tools:listitem="@layout/log_item"/>
-
+<resources>
+    <item name="item_click_support" type="id" />
+</resources>

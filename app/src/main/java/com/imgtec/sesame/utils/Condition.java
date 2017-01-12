@@ -1,3 +1,4 @@
+
 /*
  * <b>Copyright (c) 2017, Imagination Technologies Limited and/or its affiliated group companies
  *  and/or licensors. </b>
@@ -29,44 +30,22 @@
  *
  */
 
-package com.imgtec.sesame.presentation;
+package com.imgtec.sesame.utils;
 
-import com.imgtec.di.HasComponent;
-import com.imgtec.di.PerActivity;
-import com.imgtec.sesame.app.ApplicationComponent;
-import com.imgtec.sesame.presentation.fragments.ControllerFragment;
-import com.imgtec.sesame.presentation.fragments.LogsFragment;
-import com.imgtec.sesame.presentation.fragments.MainFragment;
-import com.imgtec.sesame.presentation.fragments.StatisticsFragment;
+/**
+ *
+ */
+public class Condition {
 
-import dagger.Component;
-
-@PerActivity
-@Component(
-    dependencies = ApplicationComponent.class,
-    modules = {
-        ActivityModule.class
-    }
-)
-public interface ActivityComponent {
-
-  class Initializer {
-
-    private Initializer() {}
-
-    static ActivityComponent init(BaseActivity activity) {
-      return DaggerActivityComponent
-          .builder()
-          .applicationComponent(((HasComponent<ApplicationComponent>) activity.getApplicationContext()).getComponent())
-          .activityModule(new ActivityModule(activity))
-          .build();
+  public static void check(boolean condition, String errorMessage, Object... messageArgs) {
+    if (condition == false) {
+      throw new IllegalStateException(String.format(errorMessage, messageArgs));
     }
   }
 
-  void inject(MainActivity activity);
-  void inject(MainFragment fragment);
-  void inject(StatisticsFragment fragment);
-  void inject(ControllerFragment fragment);
-  void inject(LogsFragment fragment);
-
+  public static void checkArgument(boolean condition, String errorMessage, Object... messageArgs) {
+    if (condition == false) {
+      throw new IllegalArgumentException(String.format(errorMessage, messageArgs));
+    }
+  }
 }

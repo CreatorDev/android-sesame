@@ -29,44 +29,72 @@
  *
  */
 
-package com.imgtec.sesame.presentation;
+package com.imgtec.sesame.presentation.adapters;
 
-import com.imgtec.di.HasComponent;
-import com.imgtec.di.PerActivity;
-import com.imgtec.sesame.app.ApplicationComponent;
-import com.imgtec.sesame.presentation.fragments.ControllerFragment;
-import com.imgtec.sesame.presentation.fragments.LogsFragment;
-import com.imgtec.sesame.presentation.fragments.MainFragment;
-import com.imgtec.sesame.presentation.fragments.StatisticsFragment;
+import android.support.annotation.NonNull;
+import android.support.v7.widget.RecyclerView;
+import android.view.ViewGroup;
 
-import dagger.Component;
+import org.slf4j.LoggerFactory;
 
-@PerActivity
-@Component(
-    dependencies = ApplicationComponent.class,
-    modules = {
-        ActivityModule.class
-    }
-)
-public interface ActivityComponent {
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
-  class Initializer {
+/**
+ *
+ */
+public abstract class BaseAdapter<V, K extends RecyclerView.ViewHolder> extends RecyclerView.Adapter<K> {
 
-    private Initializer() {}
+  private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(BaseAdapter.class);
 
-    static ActivityComponent init(BaseActivity activity) {
-      return DaggerActivityComponent
-          .builder()
-          .applicationComponent(((HasComponent<ApplicationComponent>) activity.getApplicationContext()).getComponent())
-          .activityModule(new ActivityModule(activity))
-          .build();
+  protected List<V> data = new ArrayList<>();
+
+  @Override
+  public abstract K onCreateViewHolder(ViewGroup parent, int viewType);
+
+  @Override
+  public abstract void onBindViewHolder(K holder, int position);
+
+  @Override
+  public int getItemCount() {
+    return data.size();
+  }
+
+  public void add(@NonNull V item) {
+
+    if (!data.contains(item)) {
+      data.add(item);
     }
   }
 
-  void inject(MainActivity activity);
-  void inject(MainFragment fragment);
-  void inject(StatisticsFragment fragment);
-  void inject(ControllerFragment fragment);
-  void inject(LogsFragment fragment);
+  public void addAll(@NonNull Collection<V> items) {
+    for (V item : items) {
+      add(item);
+    }
+  }
 
+  public void addAllNonCopy(List<V> items) {
+    this.data = items;
+  }
+
+  public int getPosition(V item) {
+    return data.indexOf(item);
+  }
+
+  public V getItem(int position) {
+    return data.get(position);
+  }
+
+  public List<V> getItems() {
+    return new ArrayList<>(data);
+  }
+
+  public void remove(int position) {
+    data.remove(position);
+  }
+
+  public void clear() {
+    data.clear();
+  }
 }

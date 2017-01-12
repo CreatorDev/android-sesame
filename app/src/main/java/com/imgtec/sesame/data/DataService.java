@@ -31,10 +31,16 @@
 
 package com.imgtec.sesame.data;
 
+import com.imgtec.sesame.data.api.pojo.Log;
+
+import java.util.List;
+
 /**
  *
  */
 public interface DataService {
 
   void performSync();
+
+  void requestLogs(DataCallback<DataService, List<Log>> callback);
 }
