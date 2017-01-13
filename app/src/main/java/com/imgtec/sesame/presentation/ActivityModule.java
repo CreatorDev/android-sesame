@@ -62,4 +62,8 @@ final class ActivityModule {
     return activity;
   }
 
+  @Provides
+  ErrorPresenter provideErrorPresenter(BaseActivity activity) {
+    return new ErrorPresenter(activity);
+  }
 }

@@ -31,56 +31,25 @@
 
 package com.imgtec.sesame.presentation;
 
-import android.os.Handler;
-
-import com.imgtec.sesame.data.DataCallback;
-import com.imgtec.sesame.presentation.fragments.BaseFragment;
-import com.imgtec.sesame.utils.Condition;
+import android.widget.Toast;
 
 import java.lang.ref.WeakReference;
 
 /**
  *
  */
-public abstract class AbstractDataCallback<F extends BaseFragment, S,T>
-    implements DataCallback<S, T> {
 
-  final Handler mainHandler;
-  WeakReference<F> fragment;
+public class ErrorPresenter {
+  private final WeakReference<BaseActivity> activityContext;
 
-  public AbstractDataCallback(F fragment, Handler mainHandler) throws IllegalArgumentException {
+  public ErrorPresenter(BaseActivity activity) {
     super();
-    Condition.checkArgument(fragment != null, "Fragment cannot be null");
-    Condition.checkArgument(mainHandler != null, "Handler cannot be null");
-    this.fragment = new WeakReference<>(fragment);
-    this.mainHandler = mainHandler;
+    this.activityContext = new WeakReference<>(activity);
   }
 
-  @Override
-  public void onSuccess(final S service, final T result) {
-    mainHandler.post(new Runnable() {
-      @Override
-      public void run() {
-        F f = fragment.get();
-        if (f != null && f.isAdded()) {
-          onSuccess(f, service, result);
-        }
-      }
-    });
+  public void showError(final String message) {
+    if (activityContext.get() != null) {
+      Toast.makeText(activityContext.get(), message, Toast.LENGTH_LONG).show();
+    }
   }
-
-  @Override
-  public void onFailure(final S service, final Throwable t) {
-    mainHandler.post(() -> {
-      F f = fragment.get();
-      if (f != null && f.isAdded()) {
-        onFailure(f, service, t);
-      }
-    });
-  }
-
-  protected abstract void onSuccess(F fragment, S service, T result);
-
-  protected abstract void onFailure(F fragment, S service, Throwable t);
 }
-

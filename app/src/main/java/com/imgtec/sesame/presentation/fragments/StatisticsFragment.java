@@ -33,18 +33,37 @@ package com.imgtec.sesame.presentation.fragments;
 
 
 import android.os.Bundle;
+import android.os.Handler;
+import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import com.imgtec.di.HasComponent;
 import com.imgtec.sesame.R;
+import com.imgtec.sesame.data.DataService;
+import com.imgtec.sesame.data.api.pojo.DoorsStatistics;
+import com.imgtec.sesame.data.api.pojo.StatsEntry;
+import com.imgtec.sesame.presentation.AbstractDataCallback;
 import com.imgtec.sesame.presentation.ActivityComponent;
+import com.imgtec.sesame.presentation.ErrorPresenter;
+
+import javax.inject.Inject;
+import javax.inject.Named;
+
+import butterknife.BindView;
 
 /**
  *
  */
 public class StatisticsFragment extends BaseFragment {
+
+  @Inject DataService dataService;
+  @Inject @Named("Main") Handler mainHandler;
+  @Inject ErrorPresenter errorPresenter;
+
+  @BindView(R.id.statistics) TextView text;
 
   public StatisticsFragment() {
     // Required empty public constructor
@@ -68,7 +87,56 @@ public class StatisticsFragment extends BaseFragment {
   }
 
   @Override
+  public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+    super.onActivityCreated(savedInstanceState);
+    requestStatistics();
+  }
+
+  @Override
   protected void setComponent() {
     ((HasComponent<ActivityComponent>) getActivity()).getComponent().inject(this);
+  }
+
+  private void requestStatistics() {
+    dataService.requestStatistics(new StatisticsCallback(StatisticsFragment.this, mainHandler));
+  }
+
+  private void showStatistics(DoorsStatistics statistics) {
+    text.setText(format(statistics));
+  }
+
+  private String format(DoorsStatistics statistics) {
+    StringBuilder sb = new StringBuilder();
+    sb.append(getString(R.string.since)).append(":\t").append(statistics.getSince()).append("\n");
+    sb.append(getString(R.string.openings)).append(":\n");
+    format(statistics.getOpening(), sb);
+    sb.append(getString(R.string.closings)).append(":\n");
+    format(statistics.getClosing(), sb);
+    return sb.toString();
+  }
+
+  private void format(StatsEntry statsEntry, StringBuilder sb) {
+    sb.append("\t").append(getString(R.string.min)).append(":\t").append(statsEntry.getMin()).append("\n");
+    sb.append("\t").append(getString(R.string.max)).append(":\t").append(statsEntry.getMax()).append("\n");
+    sb.append("\t").append(getString(R.string.avg)).append(":\t").append(statsEntry.getAvg()).append("\n");
+  }
+
+
+  static class StatisticsCallback extends AbstractDataCallback<StatisticsFragment,
+      DataService, DoorsStatistics> {
+
+    StatisticsCallback(StatisticsFragment fragment, Handler mainHandler) throws IllegalArgumentException {
+      super(fragment, mainHandler);
+    }
+
+    @Override
+    protected void onSuccess(StatisticsFragment fragment, DataService service, DoorsStatistics result) {
+      fragment.showStatistics(result);
+    }
+
+    @Override
+    protected void onFailure(StatisticsFragment fragment, DataService service, Throwable t) {
+      fragment.errorPresenter.showError("Requesting statistics failed!" + t.getMessage());
+    }
   }
 }

@@ -29,16 +29,29 @@
   ~
   -->
 
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
              xmlns:tools="http://schemas.android.com/tools"
              android:layout_width="match_parent"
              android:layout_height="match_parent"
              tools:context="com.imgtec.sesame.presentation.fragments.StatisticsFragment">
 
-    <!-- TODO: Update blank fragment layout -->
+    <android.support.v7.widget.AppCompatButton
+        android:id="@+id/reset_statistics"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="12dp"
+        android:text="@string/reset_statistics"/>
+
     <TextView
+        android:id="@+id/statistics"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:text="@string/hello_blank_fragment"/>
+        android:layout_above="@id/reset_statistics"
+        android:paddingLeft="8dp"
+        android:paddingRight="8dp"
+        android:lineSpacingExtra="4dp"
+        android:textSize="18dp"/>
 
-</FrameLayout>
+</RelativeLayout>

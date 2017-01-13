@@ -36,6 +36,8 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.view.View;
 
+import com.imgtec.sesame.data.api.pojo.DoorsStatistics;
+
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
 
@@ -62,5 +64,4 @@ public abstract class BaseFragment extends Fragment {
   }
 
   protected abstract void setComponent();
-
 }
