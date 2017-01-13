@@ -31,7 +31,9 @@
 
 package com.imgtec.sesame.data;
 
+import com.imgtec.sesame.data.api.pojo.DoorsStatistics;
 import com.imgtec.sesame.data.api.pojo.Log;
+import com.imgtec.sesame.data.api.pojo.StatsEntry;
 
 import java.util.List;
 
@@ -43,4 +45,6 @@ public interface DataService {
   void performSync();
 
   void requestLogs(DataCallback<DataService, List<Log>> callback);
+
+  void requestStatistics(DataCallback<DataService, DoorsStatistics> callback);
 }

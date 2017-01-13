@@ -40,15 +40,16 @@ import com.imgtec.sesame.data.api.pojo.DoorsEntrypoint;
 import com.imgtec.sesame.data.api.pojo.DoorsStatistics;
 import com.imgtec.sesame.data.api.pojo.Log;
 import com.imgtec.sesame.data.api.pojo.Logs;
+import com.imgtec.sesame.data.api.pojo.StatsEntry;
+import com.imgtec.sesame.utils.Condition;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
 
-import retrofit2.Call;
-import retrofit2.Callback;
 import retrofit2.Response;
 
 /**
@@ -76,134 +77,107 @@ public class DataServiceImpl implements DataService {
 
   @Override
   public void performSync() {
-    Call<Api> api = apiService.api(hostWrapper.getHost());
-    api.enqueue(new Callback<Api>() {
-      @Override
-      public void onResponse(Call<Api> call, Response<Api> response) {
-
-        String doorsUrl = response.body().getLinkByRel("doors").getHref();
-        Call<DoorsEntrypoint> doorsEndpoints = apiService.entrypoint(doorsUrl);
-        doorsEndpoints.enqueue(new Callback<DoorsEntrypoint>() {
-          @Override
-          public void onResponse(Call<DoorsEntrypoint> call, Response<DoorsEntrypoint> response) {
-
-            final DoorsEntrypoint ep = response.body();
-            String operateUrl = ep.getLinkByRel("operate").getHref();
-            apiService.operate(operateUrl).enqueue(new Callback<Void>() {
-              @Override
-              public void onResponse(Call<Void> call, Response<Void> response) {
-
-              }
-
-              @Override
-              public void onFailure(Call<Void> call, Throwable t) {
-
-              }
-            });
-
-            String statsUrl = ep.getLinkByRel("stats").getHref();;
-            apiService.statistics(statsUrl).enqueue(new Callback<DoorsStatistics>() {
-              @Override
-              public void onResponse(Call<DoorsStatistics> call, Response<DoorsStatistics> response) {
-
-              }
-
-              @Override
-              public void onFailure(Call<DoorsStatistics> call, Throwable t) {
-
-              }
-            });
-
-            String logsUrl = ep.getLinkByRel("logs").getHref();
-            apiService.logs(logsUrl, null, null).enqueue(new Callback<Logs>() {
-              @Override
-              public void onResponse(Call<Logs> call, Response<Logs> response) {
-
-              }
-
-              @Override
-              public void onFailure(Call<Logs> call, Throwable t) {
-
-              }
-            });
-          }
-
-          @Override
-          public void onFailure(Call<DoorsEntrypoint> call, Throwable t) {
-
-          }
-        });
-
-
-      }
-
-      @Override
-      public void onFailure(Call<Api> call, Throwable t) {
-
+    executor.execute(() -> {
+      try {
+        Response<Api> api = apiService.api(hostWrapper.getHost()).execute();
+      } catch (IOException e) {
+        notifyFailure(DataServiceImpl.this, null, e);
       }
     });
-
-
   }
-
 
   @Override
   public void requestLogs(final DataCallback<DataService, List<Log>> callback) {
-    Call<Api> api = apiService.api(hostWrapper.getHost());
-    api.enqueue(new Callback<Api>() {
-      @Override
-      public void onResponse(Call<Api> call, Response<Api> response) {
 
-        String doorsUrl = response.body().getLinkByRel("doors").getHref();
-        Call<DoorsEntrypoint> doorsEndpoints = apiService.entrypoint(doorsUrl);
-        doorsEndpoints.enqueue(new Callback<DoorsEntrypoint>() {
-          @Override
-          public void onResponse(Call<DoorsEntrypoint> call, Response<DoorsEntrypoint> response) {
-
-            final DoorsEntrypoint ep = response.body();
-            String operateUrl = ep.getLinkByRel("operate").getHref();
-            apiService.operate(operateUrl).enqueue(new Callback<Void>() {
-              @Override
-              public void onResponse(Call<Void> call, Response<Void> response) {
-
-              }
-
-              @Override
-              public void onFailure(Call<Void> call, Throwable t) {
-
-              }
-            });
-
-            String logsUrl = ep.getLinkByRel("logs").getHref();
-            apiService.logs(logsUrl, null, null).enqueue(new Callback<Logs>() {
-              @Override
-              public void onResponse(Call<Logs> call, Response<Logs> response) {
-                Logs logs = response.body();
-                callback.onSuccess(DataServiceImpl.this, logs.getLogs());
-              }
-
-              @Override
-              public void onFailure(Call<Logs> call, Throwable t) {
-                callback.onFailure(DataServiceImpl.this, t);
-              }
-            });
-          }
-
-          @Override
-          public void onFailure(Call<DoorsEntrypoint> call, Throwable t) {
-
-          }
-        });
-
-
-      }
+    executor.execute(new EndpointRequestor<DataService, List<Log>>(
+        DataServiceImpl.this, apiService, hostWrapper, callback) {
 
       @Override
-      public void onFailure(Call<Api> call, Throwable t) {
+      List<Log> onExecute(RestApiService service,
+                          HostWrapper hostWrapper,
+                          DoorsEntrypoint endpoint) throws IOException {
 
+        String logsUrl = endpoint.getLinkByRel("logs").getHref();
+        Response<Logs> logs = service.logs(logsUrl, null, null).execute();
+
+        return logs.body().getLogs();
       }
     });
+  }
 
+  @Override
+  public void requestStatistics(DataCallback<DataService, DoorsStatistics> callback) {
 
+    executor.execute(new EndpointRequestor<DataService, DoorsStatistics>(
+        DataServiceImpl.this, apiService, hostWrapper, callback) {
+
+      @Override
+      DoorsStatistics onExecute(RestApiService service,
+                          HostWrapper hostWrapper,
+                          DoorsEntrypoint endpoint) throws IOException {
+
+        Response<DoorsStatistics> stats = apiService
+            .statistics(endpoint.getLinkByRel("stats").getHref())
+            .execute();
+
+        return stats.body();
+      }
+    });
+  }
+
+  /**
+   * Performs a set of http request synchronously to get {@link DoorsEntrypoint}.
+   * This method should be called from worker thread.
+   * @throws IOException if a problem occurre while interacting with the server
+   */
+  private static DoorsEntrypoint getEndpoint(RestApiService service, HostWrapper hostWrapper) throws IOException {
+    Response<Api> api = service.api(hostWrapper.getHost()).execute();
+
+    String doorsUrl = api.body().getLinkByRel("doors").getHref();
+    Response<DoorsEntrypoint> endpoints = service.entrypoint(doorsUrl).execute();
+    return endpoints.body();
+  }
+
+  private static <S, T> void notifyFailure(S service, DataCallback<S, T> callback, Throwable t) {
+    if (callback != null) {
+      callback.onFailure(service, t);
+    }
+  }
+
+  /**
+   * Base task that provides {@link DoorsEntrypoint} and lets implementer to perform rest request
+   * with proper resource.
+   * @param <S> data service
+   * @param <T> expected response type
+   */
+  static abstract class EndpointRequestor<S, T> implements Runnable {
+
+    private final S service;
+    private final RestApiService restService;
+    private final HostWrapper hostWrapper;
+    private final DataCallback<S, T> callback;
+
+    EndpointRequestor(S service, RestApiService restService, HostWrapper hostWrapper,
+                      DataCallback<S, T> callback) {
+      this.service = service;
+      this.restService = restService;
+      this.hostWrapper = hostWrapper;
+      this.callback = callback;
+    }
+
+    @Override
+    public void run() {
+      try {
+        final DoorsEntrypoint endpoint = getEndpoint(restService, hostWrapper);
+        T t = onExecute(restService, hostWrapper, endpoint);
+
+        callback.onSuccess(service, t);
+      }
+      catch (IOException e) {
+        notifyFailure(service, callback, e);
+      }
+    }
+
+    abstract T onExecute(RestApiService service, HostWrapper hostWrapper, DoorsEntrypoint endpoint) throws IOException;
   }
 }
