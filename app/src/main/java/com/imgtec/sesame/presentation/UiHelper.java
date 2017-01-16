@@ -39,17 +39,18 @@ import java.lang.ref.WeakReference;
  *
  */
 
-public class ErrorPresenter {
+public class UiHelper {
+
   private final WeakReference<BaseActivity> activityContext;
 
-  public ErrorPresenter(BaseActivity activity) {
+  public UiHelper(BaseActivity activity) {
     super();
     this.activityContext = new WeakReference<>(activity);
   }
 
-  public void showError(final String message) {
+  public void showToast(final String message, int duration) {
     if (activityContext.get() != null) {
-      Toast.makeText(activityContext.get(), message, Toast.LENGTH_LONG).show();
+      Toast.makeText(activityContext.get(), message, duration).show();
     }
   }
 }

@@ -63,7 +63,7 @@ final class ActivityModule {
   }
 
   @Provides
-  ErrorPresenter provideErrorPresenter(BaseActivity activity) {
-    return new ErrorPresenter(activity);
+  UiHelper provideErrorPresenter(BaseActivity activity) {
+    return new UiHelper(activity);
   }
 }

@@ -36,10 +36,14 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 
 import com.imgtec.di.HasComponent;
 import com.imgtec.sesame.R;
 import com.imgtec.sesame.presentation.ActivityComponent;
+
+import butterknife.BindView;
+import butterknife.OnClick;
 
 /**
  *
@@ -70,5 +74,10 @@ public class ControllerFragment extends BaseFragment {
   @Override
   protected void setComponent() {
     ((HasComponent<ActivityComponent>) getActivity()).getComponent().inject(this);
+  }
+
+  @OnClick(R.id.settings)
+  void onSettingsClicked() {
+    
   }
 }

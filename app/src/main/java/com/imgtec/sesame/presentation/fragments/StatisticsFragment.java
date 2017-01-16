@@ -39,6 +39,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.imgtec.di.HasComponent;
 import com.imgtec.sesame.R;
@@ -47,7 +48,7 @@ import com.imgtec.sesame.data.api.pojo.DoorsStatistics;
 import com.imgtec.sesame.data.api.pojo.StatsEntry;
 import com.imgtec.sesame.presentation.AbstractDataCallback;
 import com.imgtec.sesame.presentation.ActivityComponent;
-import com.imgtec.sesame.presentation.ErrorPresenter;
+import com.imgtec.sesame.presentation.UiHelper;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -61,7 +62,8 @@ public class StatisticsFragment extends BaseFragment {
 
   @Inject DataService dataService;
   @Inject @Named("Main") Handler mainHandler;
-  @Inject ErrorPresenter errorPresenter;
+  @Inject
+  UiHelper uiHelper;
 
   @BindView(R.id.statistics) TextView text;
 
@@ -136,7 +138,7 @@ public class StatisticsFragment extends BaseFragment {
 
     @Override
     protected void onFailure(StatisticsFragment fragment, DataService service, Throwable t) {
-      fragment.errorPresenter.showError("Requesting statistics failed!" + t.getMessage());
+      fragment.uiHelper.showToast("Requesting statistics failed!" + t.getMessage(), Toast.LENGTH_LONG);
     }
   }
 }

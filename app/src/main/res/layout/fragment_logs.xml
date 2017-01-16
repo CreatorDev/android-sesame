@@ -37,7 +37,7 @@
     android:id="@+id/recyclerView"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingLeft="24dp"
-    android:paddingRight="24dp"
+    android:paddingLeft="8dp"
+    android:paddingRight="8dp"
     tools:listitem="@layout/log_item"/>
 

@@ -46,12 +46,11 @@ import android.widget.Toast;
 
 import com.imgtec.di.HasComponent;
 import com.imgtec.sesame.R;
-import com.imgtec.sesame.data.DataCallback;
 import com.imgtec.sesame.data.DataService;
 import com.imgtec.sesame.data.api.pojo.Log;
 import com.imgtec.sesame.presentation.AbstractDataCallback;
 import com.imgtec.sesame.presentation.ActivityComponent;
-import com.imgtec.sesame.presentation.ErrorPresenter;
+import com.imgtec.sesame.presentation.UiHelper;
 import com.imgtec.sesame.presentation.adapters.LogsAdapter;
 import com.imgtec.sesame.presentation.helpers.RecyclerItemClickSupport;
 
@@ -71,7 +70,8 @@ public class LogsFragment extends BaseFragment {
 
   @Inject DataService dataService;
   @Inject @Named("Main") Handler mainHandler;
-  @Inject ErrorPresenter errorPresenter;
+  @Inject
+  UiHelper uiHelper;
 
   private LogsAdapter adapter;
 
@@ -142,7 +142,7 @@ public class LogsFragment extends BaseFragment {
 
     @Override
     protected void onFailure(LogsFragment fragment, DataService service, Throwable t) {
-      fragment.errorPresenter.showError("Failed to request logs! "+ t.getMessage());
+      fragment.uiHelper.showToast("Failed to request logs! "+ t.getMessage(), Toast.LENGTH_LONG);
     }
   }
 
