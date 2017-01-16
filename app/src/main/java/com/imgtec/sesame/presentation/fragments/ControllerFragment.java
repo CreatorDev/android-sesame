@@ -160,6 +160,8 @@ public class ControllerFragment extends BaseFragment {
           credentialsWrapper.setSecret(secretStr);
           credentialsWrapper.setToken(token);
 
+          dataService.clearCache();
+
           dialog.dismiss();
           configurationDialog = null;
         });

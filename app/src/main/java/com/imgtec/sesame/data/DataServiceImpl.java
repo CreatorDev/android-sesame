@@ -40,8 +40,6 @@ import com.imgtec.sesame.data.api.pojo.DoorsEntrypoint;
 import com.imgtec.sesame.data.api.pojo.DoorsStatistics;
 import com.imgtec.sesame.data.api.pojo.Log;
 import com.imgtec.sesame.data.api.pojo.Logs;
-import com.imgtec.sesame.data.api.pojo.StatsEntry;
-import com.imgtec.sesame.utils.Condition;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,6 +47,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.atomic.AtomicReference;
 
 import retrofit2.Response;
 
@@ -63,6 +62,7 @@ public class DataServiceImpl implements DataService {
   private final Handler handler;
   private final HostWrapper hostWrapper;
   private final RestApiService apiService;
+  private AtomicReference<DoorsEntrypoint> entrypoint;
 
   public DataServiceImpl(ScheduledExecutorService executorService,
                          Handler handler,
@@ -73,6 +73,7 @@ public class DataServiceImpl implements DataService {
     this.handler = handler;
     this.hostWrapper = hostWrapper;
     this.apiService = apiService;
+    entrypoint = new AtomicReference<>(null);
   }
 
   @Override
@@ -125,6 +126,17 @@ public class DataServiceImpl implements DataService {
     });
   }
 
+  @Override
+  public void clearCache() {
+    entrypoint.set(null);
+  }
+
+  @Override
+  public AtomicReference<DoorsEntrypoint> getCachedEntryPoint() {
+
+    return entrypoint;
+  }
+
   /**
    * Performs a set of http request synchronously to get {@link DoorsEntrypoint}.
    * This method should be called from worker thread.
@@ -150,7 +162,7 @@ public class DataServiceImpl implements DataService {
    * @param <S> data service
    * @param <T> expected response type
    */
-  static abstract class EndpointRequestor<S, T> implements Runnable {
+  static abstract class EndpointRequestor<S extends DataService, T> implements Runnable {
 
     private final S service;
     private final RestApiService restService;
@@ -168,8 +180,15 @@ public class DataServiceImpl implements DataService {
     @Override
     public void run() {
       try {
-        final DoorsEntrypoint endpoint = getEndpoint(restService, hostWrapper);
-        T t = onExecute(restService, hostWrapper, endpoint);
+        AtomicReference<DoorsEntrypoint> endpoint = service.getCachedEntryPoint();
+        if (endpoint.get() == null) {
+            endpoint.set(getEndpoint(restService, hostWrapper));
+        }
+
+        if (endpoint.get() == null) {
+          throw new IllegalStateException("Missing endpoint!");
+        }
+        T t = onExecute(restService, hostWrapper, endpoint.get());
 
         callback.onSuccess(service, t);
       }
