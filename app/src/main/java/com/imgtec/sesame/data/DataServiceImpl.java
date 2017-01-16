@@ -37,9 +37,11 @@ import com.imgtec.sesame.data.api.HostWrapper;
 import com.imgtec.sesame.data.api.RestApiService;
 import com.imgtec.sesame.data.api.pojo.Api;
 import com.imgtec.sesame.data.api.pojo.DoorsEntrypoint;
+import com.imgtec.sesame.data.api.pojo.DoorsState;
 import com.imgtec.sesame.data.api.pojo.DoorsStatistics;
 import com.imgtec.sesame.data.api.pojo.Log;
 import com.imgtec.sesame.data.api.pojo.Logs;
+import com.imgtec.sesame.utils.Condition;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,6 +49,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 import retrofit2.Response;
@@ -62,7 +65,8 @@ public class DataServiceImpl implements DataService {
   private final Handler handler;
   private final HostWrapper hostWrapper;
   private final RestApiService apiService;
-  private AtomicReference<DoorsEntrypoint> entrypoint;
+  private final AtomicReference<DoorsEntrypoint> entrypoint;
+  private boolean pollingEnabled;
 
   public DataServiceImpl(ScheduledExecutorService executorService,
                          Handler handler,
@@ -73,24 +77,13 @@ public class DataServiceImpl implements DataService {
     this.handler = handler;
     this.hostWrapper = hostWrapper;
     this.apiService = apiService;
-    entrypoint = new AtomicReference<>(null);
-  }
-
-  @Override
-  public void performSync() {
-    executor.execute(() -> {
-      try {
-        Response<Api> api = apiService.api(hostWrapper.getHost()).execute();
-      } catch (IOException e) {
-        notifyFailure(DataServiceImpl.this, null, e);
-      }
-    });
+    this.entrypoint = new AtomicReference<>(null);
   }
 
   @Override
   public void requestLogs(final DataCallback<DataService, List<Log>> callback) {
 
-    executor.execute(new EndpointRequestor<DataService, List<Log>>(
+    executor.execute(new EntryPointRequestor<DataService, List<Log>>(
         DataServiceImpl.this, apiService, hostWrapper, callback) {
 
       @Override
@@ -109,7 +102,7 @@ public class DataServiceImpl implements DataService {
   @Override
   public void requestStatistics(DataCallback<DataService, DoorsStatistics> callback) {
 
-    executor.execute(new EndpointRequestor<DataService, DoorsStatistics>(
+    executor.execute(new EntryPointRequestor<DataService, DoorsStatistics>(
         DataServiceImpl.this, apiService, hostWrapper, callback) {
 
       @Override
@@ -127,14 +120,52 @@ public class DataServiceImpl implements DataService {
   }
 
   @Override
+  public void requestState(final DataCallback<DataService, DoorsState> callback) {
+    executor.execute(new EntryPointRequestor<DataService, DoorsState>(
+        DataServiceImpl.this, apiService, hostWrapper, callback) {
+
+      @Override
+      DoorsState onExecute(RestApiService service, HostWrapper hostWrapper, DoorsEntrypoint endpoint) throws IOException {
+        Response<DoorsState> stats = apiService.state(endpoint.getLinkByRel("state").getHref())
+            .execute();
+        return stats.body();
+      }
+    });
+  }
+
+  @Override
   public void clearCache() {
     entrypoint.set(null);
   }
 
   @Override
   public AtomicReference<DoorsEntrypoint> getCachedEntryPoint() {
-
     return entrypoint;
+  }
+
+  @Override
+  public void startPollingDoorState(DataCallback<DataService, DoorsState> callback) {
+    synchronized (this) {
+      if (!pollingEnabled) {
+        pollingEnabled = true;
+        schedulePollingTask(callback);
+        logger.debug("Polling task started!");
+      }
+    }
+  }
+
+  @Override
+  public void stopPollingDoorState() {
+    synchronized (this) {
+      if (pollingEnabled) {
+        pollingEnabled = false;
+        logger.debug("Polling task stopped!");
+      }
+    }
+  }
+
+  private void schedulePollingTask(DataCallback<DataService, DoorsState> callback) {
+    executor.schedule(new PollingTask(callback), 2, TimeUnit.SECONDS);
   }
 
   /**
@@ -142,7 +173,7 @@ public class DataServiceImpl implements DataService {
    * This method should be called from worker thread.
    * @throws IOException if a problem occurre while interacting with the server
    */
-  private static DoorsEntrypoint getEndpoint(RestApiService service, HostWrapper hostWrapper) throws IOException {
+  private static DoorsEntrypoint getEntrypoint(RestApiService service, HostWrapper hostWrapper) throws IOException {
     Response<Api> api = service.api(hostWrapper.getHost()).execute();
 
     String doorsUrl = api.body().getLinkByRel("doors").getHref();
@@ -162,15 +193,16 @@ public class DataServiceImpl implements DataService {
    * @param <S> data service
    * @param <T> expected response type
    */
-  static abstract class EndpointRequestor<S extends DataService, T> implements Runnable {
+  static abstract class EntryPointRequestor<S extends DataService, T> implements Runnable {
 
+    private final Logger logger = LoggerFactory.getLogger(getClass().getSimpleName());
     private final S service;
     private final RestApiService restService;
     private final HostWrapper hostWrapper;
     private final DataCallback<S, T> callback;
 
-    EndpointRequestor(S service, RestApiService restService, HostWrapper hostWrapper,
-                      DataCallback<S, T> callback) {
+    EntryPointRequestor(S service, RestApiService restService, HostWrapper hostWrapper,
+                        DataCallback<S, T> callback) {
       this.service = service;
       this.restService = restService;
       this.hostWrapper = hostWrapper;
@@ -180,23 +212,59 @@ public class DataServiceImpl implements DataService {
     @Override
     public void run() {
       try {
-        AtomicReference<DoorsEntrypoint> endpoint = service.getCachedEntryPoint();
-        if (endpoint.get() == null) {
-            endpoint.set(getEndpoint(restService, hostWrapper));
+
+        Condition.check(callback != null, "Callback cannot be NULL");
+
+        AtomicReference<DoorsEntrypoint> entrypoint = null;
+        synchronized (service) {
+          entrypoint = service.getCachedEntryPoint();
+
+          if (entrypoint.get() == null) {
+            entrypoint.set(getEntrypoint(restService, hostWrapper));
+          }
         }
 
-        if (endpoint.get() == null) {
-          throw new IllegalStateException("Missing endpoint!");
+        if (entrypoint.get() == null) {
+          throw new IllegalStateException("Entrypoint is null!");
         }
-        T t = onExecute(restService, hostWrapper, endpoint.get());
+
+        T t = onExecute(restService, hostWrapper, entrypoint.get());
 
         callback.onSuccess(service, t);
       }
       catch (IOException e) {
         notifyFailure(service, callback, e);
       }
+      catch (Exception e2) {
+        logger.error("Executing task failed!", e2);
+      }
     }
 
-    abstract T onExecute(RestApiService service, HostWrapper hostWrapper, DoorsEntrypoint endpoint) throws IOException;
+    abstract T onExecute(RestApiService service, HostWrapper hostWrapper, DoorsEntrypoint entrypoint) throws IOException;
+  }
+
+  private class PollingTask implements Runnable {
+
+    private final DataCallback<DataService, DoorsState> callback;
+
+    public PollingTask(DataCallback<DataService, DoorsState> callback) {
+      this.callback = callback;
+    }
+
+    @Override
+    public void run() {
+      logger.debug("Executing polling task: {}", this);
+
+      boolean polling;
+      requestState(callback);
+      synchronized (DataServiceImpl.this) {
+        polling = pollingEnabled;
+      }
+
+      if (polling) {
+        schedulePollingTask(callback);
+      }
+      logger.debug("Polling task finished: {}", this);
+    }
   }
 }

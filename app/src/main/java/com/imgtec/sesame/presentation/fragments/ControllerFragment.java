@@ -33,6 +33,7 @@ package com.imgtec.sesame.presentation.fragments;
 
 
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -48,9 +49,18 @@ import com.imgtec.sesame.data.DataService;
 import com.imgtec.sesame.data.Preferences;
 import com.imgtec.sesame.data.api.CredentialsWrapper;
 import com.imgtec.sesame.data.api.HostWrapper;
+import com.imgtec.sesame.data.api.pojo.DoorsState;
+import com.imgtec.sesame.data.api.pojo.Log;
+import com.imgtec.sesame.presentation.AbstractDataCallback;
 import com.imgtec.sesame.presentation.ActivityComponent;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.List;
+
 import javax.inject.Inject;
+import javax.inject.Named;
 
 import butterknife.BindView;
 import butterknife.OnClick;
@@ -66,6 +76,7 @@ public class ControllerFragment extends BaseFragment {
   @Inject DataService dataService;
   @Inject HostWrapper hostWrapper;
   @Inject CredentialsWrapper credentialsWrapper;
+  @Inject @Named("Main") Handler mainHandler;
 
   private AlertDialog configurationDialog;
 
@@ -106,6 +117,11 @@ public class ControllerFragment extends BaseFragment {
     }
   }
 
+  @Override
+  public void onPause() {
+    dataService.stopPollingDoorState();
+    super.onPause();
+  }
 
   @OnClick(R.id.settings)
   void onSettingsClicked() {
@@ -162,6 +178,8 @@ public class ControllerFragment extends BaseFragment {
 
           dataService.clearCache();
 
+          syncWithWebapp();
+
           dialog.dismiss();
           configurationDialog = null;
         });
@@ -171,6 +189,26 @@ public class ControllerFragment extends BaseFragment {
   }
 
   private void syncWithWebapp() {
-    dataService.performSync();
+    dataService.startPollingDoorState(new DoorsStateCallback(this, mainHandler));
   }
+
+  static class DoorsStateCallback extends AbstractDataCallback<ControllerFragment, DataService, DoorsState> {
+
+    Logger logger = LoggerFactory.getLogger(getClass().getSimpleName());
+
+    public DoorsStateCallback(ControllerFragment fragment, Handler mainHandler) throws IllegalArgumentException {
+      super(fragment, mainHandler);
+    }
+
+    @Override
+    protected void onSuccess(ControllerFragment fragment, DataService service, DoorsState result) {
+      logger.debug("--> door state: {}",result.getState());
+    }
+
+    @Override
+    protected void onFailure(ControllerFragment fragment, DataService service, Throwable t) {
+
+    }
+  }
+
 }
