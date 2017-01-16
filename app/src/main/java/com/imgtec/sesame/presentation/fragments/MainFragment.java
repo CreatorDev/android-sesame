@@ -36,43 +36,24 @@ import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentTabHost;
-import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.imgtec.di.HasComponent;
 import com.imgtec.sesame.R;
-import com.imgtec.sesame.data.Configuration;
-import com.imgtec.sesame.data.DataService;
-import com.imgtec.sesame.data.Preferences;
-import com.imgtec.sesame.data.api.CredentialsWrapper;
-import com.imgtec.sesame.data.api.HostWrapper;
 import com.imgtec.sesame.presentation.ActivityComponent;
 
-import javax.inject.Inject;
-
 import butterknife.BindView;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
 
 /**
  *
  */
 public class MainFragment extends BaseFragment {
 
-  @Inject Preferences preferences;
-  @Inject DataService dataService;
-  @Inject HostWrapper hostWrapper;
-  @Inject CredentialsWrapper credentialsWrapper;
 
   @BindView(R.id.tab_host) FragmentTabHost tabHost;
-
-  private AlertDialog configurationDialog;
-
 
   public MainFragment() {
     // Required empty public constructor
@@ -119,74 +100,4 @@ public class MainFragment extends BaseFragment {
   protected void setComponent() {
     ((HasComponent<ActivityComponent>) getActivity()).getComponent().inject(this);
   }
-
-  @Override
-  public void onResume() {
-    super.onResume();
-    if (preferences.getConfiguration() == null) {
-      showConfigurationDialog();
-    }
-    else {
-      syncWithWebapp();
-    }
-  }
-
-  private void showConfigurationDialog() {
-
-    LayoutInflater inflater = LayoutInflater.from(getContext());
-    final View dialogView = inflater.inflate(R.layout.configuration_dialog, null);
-    final EditText host = (EditText) dialogView.findViewById(R.id.host);
-    final EditText secret = (EditText) dialogView.findViewById(R.id.secret);
-
-    Configuration configuration = preferences.getConfiguration();
-    if (configuration != null) {
-      host.setText(configuration.getHost());
-      secret.setText(configuration.getSecret());
-    }
-
-    AlertDialog.Builder builder = new AlertDialog.Builder(getContext(), R.style.AlertDialogStyle);
-    builder
-        .setTitle(R.string.enter_credentials)
-        .setView(dialogView)
-        .setNegativeButton(R.string.cancel, (dialog, which) -> {
-          dialog.dismiss();
-          configurationDialog = null;
-        })
-        .setPositiveButton(R.string.ok, (dialog, which) -> {
-
-          String hostStr = host.getText().toString();
-          String secretStr = secret.getText().toString();
-
-          if (hostStr == null || hostStr.isEmpty() ||
-              secretStr == null || secretStr.isEmpty()) {
-            Toast.makeText(getContext(), "Host or secret is missing", Toast.LENGTH_LONG).show();
-            return;
-          }
-
-
-          final String token = Jwts.builder()
-              .setSubject("Subject")
-              .signWith(SignatureAlgorithm.HS256, secretStr.getBytes())
-              .compact();
-
-          Configuration configuration1 = new Configuration(hostStr, secretStr, token);
-          preferences.saveConfiguration(configuration1);
-
-          //update wrapper
-          hostWrapper.setHost(hostStr);
-          credentialsWrapper.setSecret(secretStr);
-          credentialsWrapper.setToken(token);
-
-          dialog.dismiss();
-          configurationDialog = null;
-        });
-
-    configurationDialog = builder.create();
-    configurationDialog.show();
-  }
-
-  private void syncWithWebapp() {
-    dataService.performSync();
-  }
-
 }
