@@ -49,4 +49,5 @@
     <string name="max">Max</string>
     <string name="avg">Avg</string>
     <string name="closings">Closings</string>
+    <string name="operate">Operate</string>
 </resources>

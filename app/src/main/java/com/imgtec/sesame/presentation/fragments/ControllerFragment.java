@@ -32,14 +32,17 @@
 package com.imgtec.sesame.presentation.fragments;
 
 
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.app.AlertDialog;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.imgtec.di.HasComponent;
@@ -66,6 +69,7 @@ import butterknife.BindView;
 import butterknife.OnClick;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import retrofit2.http.Url;
 
 /**
  *
@@ -77,6 +81,8 @@ public class ControllerFragment extends BaseFragment {
   @Inject HostWrapper hostWrapper;
   @Inject CredentialsWrapper credentialsWrapper;
   @Inject @Named("Main") Handler mainHandler;
+
+  @BindView(R.id.status_message) TextView statusMessage;
 
   private AlertDialog configurationDialog;
 
@@ -130,6 +136,11 @@ public class ControllerFragment extends BaseFragment {
     }
   }
 
+  @OnClick(R.id.operate)
+  void onOperateClicked() {
+
+  }
+
   private void showConfigurationDialog() {
 
     LayoutInflater inflater = LayoutInflater.from(getContext());
@@ -156,12 +167,12 @@ public class ControllerFragment extends BaseFragment {
           String hostStr = host.getText().toString();
           String secretStr = secret.getText().toString();
 
-          if (hostStr == null || hostStr.isEmpty() ||
-              secretStr == null || secretStr.isEmpty()) {
+          if (TextUtils.isEmpty(hostStr) || TextUtils.isEmpty(secretStr) ) {
             Toast.makeText(getContext(), "Host or secret is missing", Toast.LENGTH_LONG).show();
             return;
           }
 
+          hostStr = verifyHostOrFix(hostStr);
 
           final String token = Jwts.builder()
               .setSubject("Subject")
@@ -188,6 +199,14 @@ public class ControllerFragment extends BaseFragment {
     configurationDialog.show();
   }
 
+  private String verifyHostOrFix(String hostStr) {
+    Uri uri = Uri.parse(hostStr);
+    if (uri.getScheme() == null) {
+      return "https://" + hostStr;
+    }
+    return hostStr;
+  }
+
   private void syncWithWebapp() {
     dataService.startPollingDoorState(new DoorsStateCallback(this, mainHandler));
   }
@@ -202,12 +221,21 @@ public class ControllerFragment extends BaseFragment {
 
     @Override
     protected void onSuccess(ControllerFragment fragment, DataService service, DoorsState result) {
-      logger.debug("--> door state: {}",result.getState());
+      if (result != null) {
+        fragment.updateStatusMessage(result.getState());
+      }
     }
 
     @Override
     protected void onFailure(ControllerFragment fragment, DataService service, Throwable t) {
+      logger.warn("Requesting door state failed! {}", t.getMessage());
+      fragment.updateStatusMessage(t.getMessage());
+    }
+  }
 
+  private void updateStatusMessage(final String message) {
+    if (message != null) {
+      statusMessage.setText(message);
     }
   }
 
