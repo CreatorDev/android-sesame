@@ -52,6 +52,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
+import okhttp3.ResponseBody;
 import retrofit2.Response;
 
 /**
@@ -81,20 +82,20 @@ public class DataServiceImpl implements DataService {
   }
 
   @Override
-  public void requestLogs(final DataCallback<DataService, List<Log>> callback) {
+  public void requestLogs(final DataCallback<DataService, Logs> callback) {
 
-    executor.execute(new EntryPointRequestor<DataService, List<Log>>(
+    executor.execute(new EntryPointRequestor<DataService, Logs>(
         DataServiceImpl.this, apiService, hostWrapper, callback) {
 
       @Override
-      List<Log> onExecute(RestApiService service,
+      Response<Logs> onExecute(RestApiService service,
                           HostWrapper hostWrapper,
                           DoorsEntrypoint endpoint) throws IOException {
 
         String logsUrl = endpoint.getLinkByRel("logs").getHref();
         Response<Logs> logs = service.logs(logsUrl, null, null).execute();
 
-        return logs.body().getLogs();
+        return logs;
       }
     });
   }
@@ -106,7 +107,7 @@ public class DataServiceImpl implements DataService {
         DataServiceImpl.this, apiService, hostWrapper, callback) {
 
       @Override
-      DoorsStatistics onExecute(RestApiService service,
+      Response<DoorsStatistics> onExecute(RestApiService service,
                           HostWrapper hostWrapper,
                           DoorsEntrypoint endpoint) throws IOException {
 
@@ -114,7 +115,7 @@ public class DataServiceImpl implements DataService {
             .statistics(endpoint.getLinkByRel("stats").getHref())
             .execute();
 
-        return stats.body();
+        return stats;
       }
     });
   }
@@ -125,10 +126,10 @@ public class DataServiceImpl implements DataService {
         DataServiceImpl.this, apiService, hostWrapper, callback) {
 
       @Override
-      DoorsState onExecute(RestApiService service, HostWrapper hostWrapper, DoorsEntrypoint endpoint) throws IOException {
+      Response<DoorsState> onExecute(RestApiService service, HostWrapper hostWrapper, DoorsEntrypoint endpoint) throws IOException {
         Response<DoorsState> stats = apiService.state(endpoint.getLinkByRel("state").getHref())
             .execute();
-        return stats.body();
+        return stats;
       }
     });
   }
@@ -228,9 +229,14 @@ public class DataServiceImpl implements DataService {
           throw new IllegalStateException("Entrypoint is null!");
         }
 
-        T t = onExecute(restService, hostWrapper, entrypoint.get());
+        Response<T> response = onExecute(restService, hostWrapper, entrypoint.get());
 
-        callback.onSuccess(service, t);
+        final ResponseBody error = response.errorBody();
+        if (error != null) {
+          throw new IOException(error.string());
+        }
+
+        callback.onSuccess(service, response.body());
       }
       catch (IOException e) {
         notifyFailure(service, callback, e);
@@ -240,7 +246,7 @@ public class DataServiceImpl implements DataService {
       }
     }
 
-    abstract T onExecute(RestApiService service, HostWrapper hostWrapper, DoorsEntrypoint entrypoint) throws IOException;
+    abstract Response<T> onExecute(RestApiService service, HostWrapper hostWrapper, DoorsEntrypoint entrypoint) throws IOException;
   }
 
   private class PollingTask implements Runnable {

@@ -34,10 +34,8 @@ package com.imgtec.sesame.data;
 import com.imgtec.sesame.data.api.pojo.DoorsEntrypoint;
 import com.imgtec.sesame.data.api.pojo.DoorsState;
 import com.imgtec.sesame.data.api.pojo.DoorsStatistics;
-import com.imgtec.sesame.data.api.pojo.Log;
-import com.imgtec.sesame.data.api.pojo.StatsEntry;
+import com.imgtec.sesame.data.api.pojo.Logs;
 
-import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
@@ -45,7 +43,7 @@ import java.util.concurrent.atomic.AtomicReference;
  */
 public interface DataService {
 
-  void requestLogs(DataCallback<DataService, List<Log>> callback);
+  void requestLogs(DataCallback<DataService, Logs> callback);
 
   void requestStatistics(DataCallback<DataService, DoorsStatistics> callback);
 

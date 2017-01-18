@@ -48,6 +48,7 @@ import com.imgtec.di.HasComponent;
 import com.imgtec.sesame.R;
 import com.imgtec.sesame.data.DataService;
 import com.imgtec.sesame.data.api.pojo.Log;
+import com.imgtec.sesame.data.api.pojo.Logs;
 import com.imgtec.sesame.presentation.AbstractDataCallback;
 import com.imgtec.sesame.presentation.ActivityComponent;
 import com.imgtec.sesame.presentation.UiHelper;
@@ -128,7 +129,7 @@ public class LogsFragment extends BaseFragment {
     dataService.requestLogs(new RequestLogsCallback(LogsFragment.this, mainHandler));
   }
 
-  static class RequestLogsCallback extends AbstractDataCallback<LogsFragment,DataService,List<Log>> {
+  static class RequestLogsCallback extends AbstractDataCallback<LogsFragment,DataService, Logs> {
 
 
     public RequestLogsCallback(LogsFragment fragment, Handler mainHandler) throws IllegalArgumentException {
@@ -136,8 +137,10 @@ public class LogsFragment extends BaseFragment {
     }
 
     @Override
-    protected void onSuccess(LogsFragment fragment, DataService service, List<Log> result) {
-      fragment.load(result);
+    protected void onSuccess(LogsFragment fragment, DataService service, Logs result) {
+      if (result != null) {
+        fragment.load(result.getLogs());
+      }
     }
 
     @Override
