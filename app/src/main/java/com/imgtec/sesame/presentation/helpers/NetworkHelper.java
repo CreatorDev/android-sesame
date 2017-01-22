@@ -29,34 +29,73 @@
  *
  */
 
-package com.imgtec.sesame.app;
+package com.imgtec.sesame.presentation.helpers;
 
-import android.app.Application;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 
-import com.imgtec.di.HasComponent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 /**
  *
  */
-public class App extends Application implements HasComponent<ApplicationComponent> {
+public class NetworkHelper {
 
-  private ApplicationComponent component;
+  public interface NetworkStateListener {
 
-  @Override
-  public void onCreate() {
-    super.onCreate();
-
-    component = ApplicationComponent.Initializer.init(this);
-    component.inject(this);
+    void onNetworkStateChanged(NetworkInfo.State state);
   }
 
-  @Override
-  public ApplicationComponent getComponent() {
-    return component;
+  final Logger logger = LoggerFactory.getLogger(getClass());
+  final Context context;
+  final Set<NetworkStateListener> listeners = new CopyOnWriteArraySet<>();
+
+  public NetworkHelper(Context context) {
+    super();
+    this.context = context;
+    registerNetworkStateReceiver(networkReceiver);
   }
+
+  public boolean isOnline() {
+    ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+    NetworkInfo netInfo = cm.getActiveNetworkInfo();
+    return (netInfo != null && netInfo.isConnected()); //null in air plain mode
+  }
+
+  public void addNetworkStateListener(final NetworkStateListener l) {
+    listeners.add(l);
+  }
+
+  public void removeNetworkStateListener(final NetworkStateListener l) {
+    listeners.remove(l);
+  }
+
+  final void registerNetworkStateReceiver(BroadcastReceiver receiver) {
+    final IntentFilter intentFilter = new IntentFilter();
+    intentFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
+    context.registerReceiver(receiver, intentFilter);
+  }
+
+  final void unregisterNetworkStateReceiver(BroadcastReceiver receiver) {
+    context.unregisterReceiver(receiver);
+  }
+
+  BroadcastReceiver networkReceiver = new BroadcastReceiver() {
+    @Override
+    public void onReceive(Context context, Intent intent) {
+
+      final NetworkInfo info = intent.getExtras().getParcelable("networkInfo");
+      for (NetworkStateListener l: listeners) {
+        l.onNetworkStateChanged(info.getState());
+      }
+    }
+  };
 }

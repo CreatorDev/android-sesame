@@ -80,6 +80,22 @@ public class DataServiceImpl implements DataService {
   }
 
   @Override
+  public void requestApi(DataCallback<DataService, Api> callback) {
+    executor.execute(() -> {
+      try {
+        Response<Api> api = apiService.api(hostWrapper.getHost()).execute();
+        ResponseBody error = api.errorBody();
+        if (error != null) {
+          throw new IOException(error.string());
+        }
+        callback.onSuccess(DataServiceImpl.this, api.body());
+      } catch (IOException e) {
+        callback.onFailure(DataServiceImpl.this, e);
+      }
+    });
+  }
+
+  @Override
   public void requestLogs(final DataCallback<DataService, Logs> callback) {
 
     executor.execute(new EntryPointRequestor<DataService, Logs>(

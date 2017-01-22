@@ -32,14 +32,18 @@
 package com.imgtec.sesame.presentation.fragments;
 
 
+import android.graphics.drawable.GradientDrawable;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -51,9 +55,11 @@ import com.imgtec.sesame.data.DataService;
 import com.imgtec.sesame.data.Preferences;
 import com.imgtec.sesame.data.api.CredentialsWrapper;
 import com.imgtec.sesame.data.api.HostWrapper;
+import com.imgtec.sesame.data.api.pojo.Api;
 import com.imgtec.sesame.data.api.pojo.DoorsState;
 import com.imgtec.sesame.presentation.AbstractDataCallback;
 import com.imgtec.sesame.presentation.ActivityComponent;
+import com.imgtec.sesame.presentation.helpers.NetworkHelper;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -76,7 +82,9 @@ public class ControllerFragment extends BaseFragment {
   @Inject HostWrapper hostWrapper;
   @Inject CredentialsWrapper credentialsWrapper;
   @Inject @Named("Main") Handler mainHandler;
+  @Inject NetworkHelper networkHelper;
 
+  @BindView(R.id.operate) Button operate;
   @BindView(R.id.status_message) TextView statusMessage;
 
   private AlertDialog configurationDialog;
@@ -110,6 +118,8 @@ public class ControllerFragment extends BaseFragment {
   @Override
   public void onResume() {
     super.onResume();
+    networkHelper.addNetworkStateListener(networkListener);
+
     if (preferences.getConfiguration() == null) {
       showConfigurationDialog();
     }
@@ -118,9 +128,27 @@ public class ControllerFragment extends BaseFragment {
     }
   }
 
+  private void requestNetworkState() {
+    if (networkHelper.isOnline()) {
+      dataService.requestApi(new ApiCallback(this, mainHandler));
+    }
+    else {
+      updateOfflineState();
+    }
+  }
+
+  private void updateOnlineState() {
+    applyBgColor(operate, android.R.color.holo_green_light);
+  }
+
+  private void updateOfflineState() {
+    applyBgColor(operate, R.color.secondary_color_dark_grey);
+  }
+
   @Override
   public void onPause() {
     dataService.stopPollingDoorState();
+    networkHelper.removeNetworkStateListener(networkListener);
     super.onPause();
   }
 
@@ -132,9 +160,17 @@ public class ControllerFragment extends BaseFragment {
   }
 
   @OnClick(R.id.operate)
-  void onOperateClicked() {
-
+  void onOperateClicked(Button btn) {
+    if (btn == operate) {
+      applyBgColor(btn, android.R.color.holo_green_light);
+    }
   }
+
+  private void applyBgColor(Button btn, int color) {
+    GradientDrawable bgShape = (GradientDrawable) btn.getBackground();
+    bgShape.setColor(ContextCompat.getColor(getContext(), color));
+  }
+
 
   private void showConfigurationDialog() {
 
@@ -203,7 +239,40 @@ public class ControllerFragment extends BaseFragment {
   }
 
   private void syncWithWebapp() {
+
     dataService.startPollingDoorState(new DoorsStateCallback(this, mainHandler));
+    requestNetworkState();
+  }
+
+  private void updateStatusMessage(final String message) {
+    if (message != null) {
+      statusMessage.setText(message);
+    }
+  }
+
+  /**
+   * Handle webapp available or not.
+   */
+  static class ApiCallback extends AbstractDataCallback<ControllerFragment, DataService, Api> {
+
+    Logger logger = LoggerFactory.getLogger(getClass().getSimpleName());
+
+    public ApiCallback(ControllerFragment fragment, Handler mainHandler) throws IllegalArgumentException {
+      super(fragment, mainHandler);
+    }
+
+    @Override
+    protected void onSuccess(ControllerFragment fragment, DataService service, Api result) {
+      if (result != null) {
+        fragment.updateOnlineState();
+      }
+    }
+
+    @Override
+    protected void onFailure(ControllerFragment fragment, DataService service, Throwable t) {
+      logger.warn("Requesting api failed! {}", t.getMessage());
+      fragment.updateOfflineState();
+    }
   }
 
   /**
@@ -231,10 +300,10 @@ public class ControllerFragment extends BaseFragment {
     }
   }
 
-  private void updateStatusMessage(final String message) {
-    if (message != null) {
-      statusMessage.setText(message);
-    }
-  }
 
+
+  NetworkHelper.NetworkStateListener networkListener = (NetworkInfo.State state) -> {
+    requestNetworkState();
+
+  };
 }

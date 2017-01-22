@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <!--
   ~ <b>Copyright (c) 2017, Imagination Technologies Limited and/or its affiliated group companies
   ~  and/or licensors. </b>
@@ -29,48 +30,12 @@
   ~
   -->
 
-<RelativeLayout
+
+<shape
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".presentation.fragments.ControllerFragment">
+    android:shape="ring"
+    android:thickness="10dp"
+    android:useLevel="false">
+    <solid android:color="@color/secondary_color_dark_grey" />
 
-    <ImageButton
-        android:id="@+id/settings"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:background="@android:color/transparent"
-        android:src="@drawable/ic_settings_black_24dp"
-        android:tint="@color/primary_color_purple"
-        android:padding="12dp"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentRight="true"
-        tools:ignore="ContentDescription,RtlHardcoded"/>
-
-    <RelativeLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerInParent="true">
-
-        <Button
-            android:id="@+id/operate"
-            android:layout_width="144dp"
-            android:layout_height="144dp"
-            android:text="@string/operate"
-            android:background="@drawable/operation_shape"/>
-
-    </RelativeLayout>
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/status_message"
-        android:layout_alignParentBottom="true"
-        android:padding="24dp"
-        android:layout_centerHorizontal="true"
-        tools:text="Opening doors..."
-        android:lines="1"
-        android:ellipsize="end"
-        />
-</RelativeLayout>
+</shape>

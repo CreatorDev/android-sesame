@@ -41,6 +41,7 @@ import com.imgtec.sesame.data.DataService;
 import com.imgtec.sesame.data.api.HostWrapper;
 import com.imgtec.sesame.data.api.ApiModule;
 import com.imgtec.sesame.data.api.RestApiService;
+import com.imgtec.sesame.presentation.helpers.NetworkHelper;
 
 import javax.inject.Named;
 
@@ -82,7 +83,7 @@ public interface ApplicationComponent {
 
   DataService getDataService();
 
-  //OkHttpClient getOkHttpClient();
+  NetworkHelper getNetworkHelper();
 
   RestApiService getRestApiService();
 

@@ -35,6 +35,7 @@ import android.content.Context;
 import android.os.Handler;
 
 import com.imgtec.di.PerApp;
+import com.imgtec.sesame.presentation.helpers.NetworkHelper;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -81,4 +82,8 @@ public final class ApplicationModule {
     return new Handler(application.getMainLooper());
   }
 
+  @Provides @PerApp
+  NetworkHelper provideNetowrkHelper(Context context) {
+    return new NetworkHelper(context);
+  }
 }
