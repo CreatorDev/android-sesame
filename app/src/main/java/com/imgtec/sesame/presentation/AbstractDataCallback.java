@@ -58,13 +58,10 @@ public abstract class AbstractDataCallback<F extends BaseFragment, S,T>
 
   @Override
   public void onSuccess(final S service, final T result) {
-    mainHandler.post(new Runnable() {
-      @Override
-      public void run() {
-        F f = fragment.get();
-        if (f != null && f.isAdded()) {
-          onSuccess(f, service, result);
-        }
+    mainHandler.post(() -> {
+      F f = fragment.get();
+      if (f != null && f.isAdded()) {
+        onSuccess(f, service, result);
       }
     });
   }

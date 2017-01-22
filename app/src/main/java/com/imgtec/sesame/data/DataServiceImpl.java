@@ -39,7 +39,6 @@ import com.imgtec.sesame.data.api.pojo.Api;
 import com.imgtec.sesame.data.api.pojo.DoorsEntrypoint;
 import com.imgtec.sesame.data.api.pojo.DoorsState;
 import com.imgtec.sesame.data.api.pojo.DoorsStatistics;
-import com.imgtec.sesame.data.api.pojo.Log;
 import com.imgtec.sesame.data.api.pojo.Logs;
 import com.imgtec.sesame.utils.Condition;
 
@@ -47,7 +46,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
@@ -172,7 +170,7 @@ public class DataServiceImpl implements DataService {
   /**
    * Performs a set of http request synchronously to get {@link DoorsEntrypoint}.
    * This method should be called from worker thread.
-   * @throws IOException if a problem occurre while interacting with the server
+   * @throws IOException if a problem occurs while interacting with the server
    */
   private static DoorsEntrypoint getEntrypoint(RestApiService service, HostWrapper hostWrapper) throws IOException {
     Response<Api> api = service.api(hostWrapper.getHost()).execute();

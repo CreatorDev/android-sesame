@@ -129,6 +129,9 @@ public class LogsFragment extends BaseFragment {
     dataService.requestLogs(new RequestLogsCallback(LogsFragment.this, mainHandler));
   }
 
+  /**
+   *
+   */
   static class RequestLogsCallback extends AbstractDataCallback<LogsFragment,DataService, Logs> {
 
 

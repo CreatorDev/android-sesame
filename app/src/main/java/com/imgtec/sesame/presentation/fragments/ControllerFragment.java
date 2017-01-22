@@ -41,7 +41,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
-import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -53,14 +52,11 @@ import com.imgtec.sesame.data.Preferences;
 import com.imgtec.sesame.data.api.CredentialsWrapper;
 import com.imgtec.sesame.data.api.HostWrapper;
 import com.imgtec.sesame.data.api.pojo.DoorsState;
-import com.imgtec.sesame.data.api.pojo.Log;
 import com.imgtec.sesame.presentation.AbstractDataCallback;
 import com.imgtec.sesame.presentation.ActivityComponent;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.List;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -69,7 +65,6 @@ import butterknife.BindView;
 import butterknife.OnClick;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
-import retrofit2.http.Url;
 
 /**
  *
@@ -211,6 +206,9 @@ public class ControllerFragment extends BaseFragment {
     dataService.startPollingDoorState(new DoorsStateCallback(this, mainHandler));
   }
 
+  /**
+   *
+   */
   static class DoorsStateCallback extends AbstractDataCallback<ControllerFragment, DataService, DoorsState> {
 
     Logger logger = LoggerFactory.getLogger(getClass().getSimpleName());

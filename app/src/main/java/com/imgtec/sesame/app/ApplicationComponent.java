@@ -82,7 +82,7 @@ public interface ApplicationComponent {
 
   DataService getDataService();
 
-  OkHttpClient getOkHttpClient();
+  //OkHttpClient getOkHttpClient();
 
   RestApiService getRestApiService();
 
