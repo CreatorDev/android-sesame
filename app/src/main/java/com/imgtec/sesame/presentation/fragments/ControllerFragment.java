@@ -55,7 +55,6 @@ import com.imgtec.sesame.data.DataService;
 import com.imgtec.sesame.data.Preferences;
 import com.imgtec.sesame.data.api.CredentialsWrapper;
 import com.imgtec.sesame.data.api.HostWrapper;
-import com.imgtec.sesame.data.api.pojo.Api;
 import com.imgtec.sesame.data.api.pojo.DoorsState;
 import com.imgtec.sesame.presentation.AbstractDataCallback;
 import com.imgtec.sesame.presentation.ActivityComponent;
@@ -239,9 +238,26 @@ public class ControllerFragment extends BaseFragment {
     return hostStr;
   }
 
-  private void updateStatusMessage(final String message) {
-    if (message != null) {
-      statusMessage.setText(message);
+  private void updateStatusMessage(final String state, DoorsState lastDoorsState) {
+
+    statusMessage.setText("");
+    if (lastDoorsState != null && state.toLowerCase().equals("unknown")) {
+      if (lastDoorsState.getState().toLowerCase().equals("opened") ) {
+        statusMessage.setText("closing");
+      }
+      else if (lastDoorsState.getState().toLowerCase().equals("closed") ) {
+        statusMessage.setText("opening");
+      }
+    }
+
+    if (state != null && !state.toLowerCase().equals("unknown")) { //opened/closed states
+      statusMessage.setText(state);
+    }
+  }
+
+  private void updateStatusMessage(Throwable t, DoorsState lastDoorsState) {
+    if (t != null) {
+      statusMessage.setText(t.getMessage());
     }
   }
 
@@ -260,7 +276,7 @@ public class ControllerFragment extends BaseFragment {
     protected void onSuccess(ControllerFragment fragment, DataService service, DoorsState result) {
       if (result != null) {
         fragment.updateOnlineState();
-        fragment.updateStatusMessage(result.getState());
+        fragment.updateStatusMessage(result.getState(), service.getLastDoorsState());
       }
     }
 
@@ -268,7 +284,7 @@ public class ControllerFragment extends BaseFragment {
     protected void onFailure(ControllerFragment fragment, DataService service, Throwable t) {
       logger.warn("Requesting door state failed! {}", t.getMessage());
       fragment.updateOfflineState();
-      fragment.updateStatusMessage(t.getMessage());
+      fragment.updateStatusMessage(t, service.getLastDoorsState());
     }
   }
 

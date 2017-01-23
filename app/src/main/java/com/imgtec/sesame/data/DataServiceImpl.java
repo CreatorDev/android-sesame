@@ -67,6 +67,8 @@ public class DataServiceImpl implements DataService {
   private final AtomicReference<DoorsEntrypoint> entrypoint;
   private boolean pollingEnabled;
 
+  private DoorsState doorState;
+
   public DataServiceImpl(ScheduledExecutorService executorService,
                          Handler handler,
                          HostWrapper hostWrapper,
@@ -141,11 +143,27 @@ public class DataServiceImpl implements DataService {
 
       @Override
       Response<DoorsState> onExecute(RestApiService service, HostWrapper hostWrapper, DoorsEntrypoint endpoint) throws IOException {
-        Response<DoorsState> stats = apiService.state(endpoint.getLinkByRel("state").getHref())
+        Response<DoorsState> state = apiService.state(endpoint.getLinkByRel("state").getHref())
             .execute();
-        return stats;
+
+        DoorsState s = state.body();
+        if (isDoorOpened(s) || isDoorClosed(s)) {
+          synchronized (DataServiceImpl.this) {
+            doorState = s;
+          }
+        }
+
+        return state;
       }
     });
+  }
+
+  private static boolean isDoorOpened(DoorsState s) {
+    return (s != null && s.getState().toLowerCase().equals("opened"));
+  }
+
+  private static boolean isDoorClosed(DoorsState s) {
+    return (s != null && s.getState().toLowerCase().equals("closed"));
   }
 
   @Override
@@ -177,6 +195,11 @@ public class DataServiceImpl implements DataService {
         logger.debug("Polling task stopped!");
       }
     }
+  }
+
+  @Override
+  public synchronized DoorsState getLastDoorsState() {
+    return doorState;
   }
 
   private void schedulePollingTask(DataCallback<DataService, DoorsState> callback) {

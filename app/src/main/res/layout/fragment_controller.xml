@@ -55,8 +55,8 @@
 
         <Button
             android:id="@+id/operate"
-            android:layout_width="144dp"
-            android:layout_height="144dp"
+            android:layout_width="196dp"
+            android:layout_height="196dp"
             android:text="@string/operate"
             android:background="@drawable/operation_shape"/>
 

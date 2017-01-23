@@ -58,4 +58,6 @@ public interface DataService {
 
   void startPollingDoorState(DataCallback<DataService, DoorsState> callback);
   void stopPollingDoorState();
+
+  DoorsState getLastDoorsState();
 }
