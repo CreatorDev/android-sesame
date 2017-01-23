@@ -128,11 +128,19 @@ public class ControllerFragment extends BaseFragment {
     }
   }
 
-  private void requestNetworkState() {
+  @Override
+  public void onPause() {
+    dataService.stopPollingDoorState();
+    networkHelper.removeNetworkStateListener(networkListener);
+    super.onPause();
+  }
+
+  private void syncWithWebapp() {
     if (networkHelper.isOnline()) {
-      dataService.requestApi(new ApiCallback(this, mainHandler));
+      dataService.startPollingDoorState(new DoorsStateCallback(this, mainHandler));
     }
     else {
+      dataService.stopPollingDoorState();
       updateOfflineState();
     }
   }
@@ -143,13 +151,6 @@ public class ControllerFragment extends BaseFragment {
 
   private void updateOfflineState() {
     applyBgColor(operate, R.color.secondary_color_dark_grey);
-  }
-
-  @Override
-  public void onPause() {
-    dataService.stopPollingDoorState();
-    networkHelper.removeNetworkStateListener(networkListener);
-    super.onPause();
   }
 
   @OnClick(R.id.settings)
@@ -238,40 +239,9 @@ public class ControllerFragment extends BaseFragment {
     return hostStr;
   }
 
-  private void syncWithWebapp() {
-
-    dataService.startPollingDoorState(new DoorsStateCallback(this, mainHandler));
-    requestNetworkState();
-  }
-
   private void updateStatusMessage(final String message) {
     if (message != null) {
       statusMessage.setText(message);
-    }
-  }
-
-  /**
-   * Handle webapp available or not.
-   */
-  static class ApiCallback extends AbstractDataCallback<ControllerFragment, DataService, Api> {
-
-    Logger logger = LoggerFactory.getLogger(getClass().getSimpleName());
-
-    public ApiCallback(ControllerFragment fragment, Handler mainHandler) throws IllegalArgumentException {
-      super(fragment, mainHandler);
-    }
-
-    @Override
-    protected void onSuccess(ControllerFragment fragment, DataService service, Api result) {
-      if (result != null) {
-        fragment.updateOnlineState();
-      }
-    }
-
-    @Override
-    protected void onFailure(ControllerFragment fragment, DataService service, Throwable t) {
-      logger.warn("Requesting api failed! {}", t.getMessage());
-      fragment.updateOfflineState();
     }
   }
 
@@ -289,6 +259,7 @@ public class ControllerFragment extends BaseFragment {
     @Override
     protected void onSuccess(ControllerFragment fragment, DataService service, DoorsState result) {
       if (result != null) {
+        fragment.updateOnlineState();
         fragment.updateStatusMessage(result.getState());
       }
     }
@@ -296,14 +267,11 @@ public class ControllerFragment extends BaseFragment {
     @Override
     protected void onFailure(ControllerFragment fragment, DataService service, Throwable t) {
       logger.warn("Requesting door state failed! {}", t.getMessage());
+      fragment.updateOfflineState();
       fragment.updateStatusMessage(t.getMessage());
     }
   }
 
 
-
-  NetworkHelper.NetworkStateListener networkListener = (NetworkInfo.State state) -> {
-    requestNetworkState();
-
-  };
+  NetworkHelper.NetworkStateListener networkListener = (NetworkInfo.State state) -> syncWithWebapp();
 }

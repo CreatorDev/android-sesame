@@ -235,6 +235,7 @@ public class DataServiceImpl implements DataService {
           entrypoint = service.getCachedEntryPoint();
 
           if (entrypoint.get() == null) {
+            logger.debug("Entrypoint missing, requesting...");
             entrypoint.set(getEntrypoint(restService, hostWrapper));
           }
         }
@@ -253,6 +254,7 @@ public class DataServiceImpl implements DataService {
         callback.onSuccess(service, response.body());
       }
       catch (IOException e) {
+        logger.error("Executing task failed!", e);
         notifyFailure(service, callback, e);
       }
       catch (Exception e2) {
