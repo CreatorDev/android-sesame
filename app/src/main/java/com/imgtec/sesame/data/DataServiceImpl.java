@@ -36,6 +36,7 @@ import android.os.Handler;
 import com.imgtec.sesame.data.api.HostWrapper;
 import com.imgtec.sesame.data.api.RestApiService;
 import com.imgtec.sesame.data.api.pojo.Api;
+import com.imgtec.sesame.data.api.pojo.DoorsAction;
 import com.imgtec.sesame.data.api.pojo.DoorsEntrypoint;
 import com.imgtec.sesame.data.api.pojo.DoorsState;
 import com.imgtec.sesame.data.api.pojo.DoorsStatistics;
@@ -200,6 +201,75 @@ public class DataServiceImpl implements DataService {
   @Override
   public synchronized DoorsState getLastDoorsState() {
     return doorState;
+  }
+
+  @Override
+  public void performOperate() {
+    executor.execute(() -> {
+
+      try {
+        AtomicReference<DoorsEntrypoint> entrypoint = cacheEntryPointAndGet();
+        Response<Void> response = apiService.operate(entrypoint.get().getLinkByRel("operate").getHref()).execute();
+
+        ResponseBody err = response.errorBody();
+        if (err != null) {
+          throw new IOException(err.string());
+        }
+        //notify
+      } catch (Exception e) {
+        e.printStackTrace();
+        //notify
+      }
+    });
+  }
+
+  @Override
+  public void openDoors(DataCallback<DataService, DoorsAction> callback) {
+
+    executor.execute(new EntryPointRequestor<DataService, DoorsAction>(
+        DataServiceImpl.this, apiService, hostWrapper, callback) {
+
+
+      @Override
+      Response<DoorsAction> onExecute(RestApiService service, HostWrapper hostWrapper, DoorsEntrypoint entrypoint) throws IOException {
+        logger.debug("Performing OPEN DOOR operation");
+        Response<DoorsAction> action = apiService.open(entrypoint.getLinkByRel("open").getHref()).execute();
+
+        return action;
+      }
+    });
+  }
+
+  @Override
+  public void closeDoors(DataCallback<DataService, DoorsAction> callback) {
+    executor.execute(new EntryPointRequestor<DataService, DoorsAction>(
+        DataServiceImpl.this, apiService, hostWrapper, callback) {
+
+      @Override
+      Response<DoorsAction> onExecute(RestApiService service, HostWrapper hostWrapper, DoorsEntrypoint entrypoint) throws IOException {
+        logger.debug("Performing CLOSE DOOR operation");
+        Response<DoorsAction> action = apiService.close(entrypoint.getLinkByRel("close").getHref()).execute();
+
+        return action;
+      }
+    });
+  }
+
+  private AtomicReference<DoorsEntrypoint> cacheEntryPointAndGet() throws IOException {
+    AtomicReference<DoorsEntrypoint> entrypoint = null;
+    synchronized (DataServiceImpl.this) {
+      entrypoint = getCachedEntryPoint();
+
+      if (entrypoint.get() == null) {
+        logger.debug("Entrypoint missing, requesting...");
+        entrypoint.set(getEntrypoint(apiService, hostWrapper));
+      }
+    }
+
+    if (entrypoint.get() == null) {
+      throw new IllegalStateException("Entrypoint is null!");
+    }
+    return entrypoint;
   }
 
   private void schedulePollingTask(DataCallback<DataService, DoorsState> callback) {

@@ -32,6 +32,7 @@
 package com.imgtec.sesame.data;
 
 import com.imgtec.sesame.data.api.pojo.Api;
+import com.imgtec.sesame.data.api.pojo.DoorsAction;
 import com.imgtec.sesame.data.api.pojo.DoorsEntrypoint;
 import com.imgtec.sesame.data.api.pojo.DoorsState;
 import com.imgtec.sesame.data.api.pojo.DoorsStatistics;
@@ -60,4 +61,10 @@ public interface DataService {
   void stopPollingDoorState();
 
   DoorsState getLastDoorsState();
+
+  void performOperate();
+
+  void openDoors(DataCallback<DataService, DoorsAction> callback);
+
+  void closeDoors(DataCallback<DataService, DoorsAction> callback);
 }

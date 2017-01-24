@@ -55,9 +55,11 @@ import com.imgtec.sesame.data.DataService;
 import com.imgtec.sesame.data.Preferences;
 import com.imgtec.sesame.data.api.CredentialsWrapper;
 import com.imgtec.sesame.data.api.HostWrapper;
+import com.imgtec.sesame.data.api.pojo.DoorsAction;
 import com.imgtec.sesame.data.api.pojo.DoorsState;
 import com.imgtec.sesame.presentation.AbstractDataCallback;
 import com.imgtec.sesame.presentation.ActivityComponent;
+import com.imgtec.sesame.presentation.UiHelper;
 import com.imgtec.sesame.presentation.helpers.NetworkHelper;
 
 import org.slf4j.Logger;
@@ -82,6 +84,7 @@ public class ControllerFragment extends BaseFragment {
   @Inject CredentialsWrapper credentialsWrapper;
   @Inject @Named("Main") Handler mainHandler;
   @Inject NetworkHelper networkHelper;
+  @Inject UiHelper uiHelper;
 
   @BindView(R.id.operate) Button operate;
   @BindView(R.id.status_message) TextView statusMessage;
@@ -162,7 +165,19 @@ public class ControllerFragment extends BaseFragment {
   @OnClick(R.id.operate)
   void onOperateClicked(Button btn) {
     if (btn == operate) {
-      applyBgColor(btn, android.R.color.holo_green_light);
+      final DoorsState lastDoorsState = dataService.getLastDoorsState();
+      if (lastDoorsState != null) {
+        final DoorsActionCallback callback = new DoorsActionCallback(ControllerFragment.this, mainHandler);
+        if (lastDoorsState.getState().toLowerCase().equals("opened") ) {
+          dataService.closeDoors(callback);
+        }
+        else if (lastDoorsState.getState().toLowerCase().equals("closed") ) {
+          dataService.openDoors(callback);
+        }
+      }
+      else {
+        dataService.performOperate();
+      }
     }
   }
 
@@ -288,6 +303,26 @@ public class ControllerFragment extends BaseFragment {
     }
   }
 
+
+  /**
+   *
+   */
+  static class DoorsActionCallback extends AbstractDataCallback<ControllerFragment, DataService, DoorsAction> {
+
+    public DoorsActionCallback(ControllerFragment fragment, Handler mainHandler) throws IllegalArgumentException {
+      super(fragment, mainHandler);
+    }
+
+    @Override
+    protected void onSuccess(ControllerFragment fragment, DataService service, DoorsAction result) {
+
+    }
+
+    @Override
+    protected void onFailure(ControllerFragment fragment, DataService service, Throwable t) {
+      fragment.uiHelper.showToast("Performing action failed: " + t.getMessage(), Toast.LENGTH_SHORT);
+    }
+  }
 
   NetworkHelper.NetworkStateListener networkListener = (NetworkInfo.State state) -> syncWithWebapp();
 }
