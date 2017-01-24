@@ -72,5 +72,6 @@
         tools:text="Opening doors..."
         android:lines="1"
         android:ellipsize="end"
+        style="@style/AppTheme.StatusMessage"
         />
 </RelativeLayout>

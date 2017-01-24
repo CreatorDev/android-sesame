@@ -100,4 +100,10 @@
         <item name="android:textColor">@color/text_secondary</item>
         <item name="android:textSize">@dimen/list_item_2_size</item>
     </style>
+
+    <style name="AppTheme.StatusMessage">
+        <item name="android:textColor">@color/text_secondary</item>
+        <item name="android:textSize">@dimen/status_message_size</item>
+    </style>
+
 </resources>

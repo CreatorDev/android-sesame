@@ -39,4 +39,6 @@
     <dimen name="list_item_1_size">24sp</dimen>
     <dimen name="list_item_2_size">14sp</dimen>
 
+    <dimen name="status_message_size">18sp</dimen>
+
 </resources>
