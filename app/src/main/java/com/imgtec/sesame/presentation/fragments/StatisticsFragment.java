@@ -32,8 +32,6 @@
 package com.imgtec.sesame.presentation.fragments;
 
 
-import android.icu.text.DecimalFormat;
-import android.icu.text.NumberFormat;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
@@ -56,6 +54,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import butterknife.BindView;
+import butterknife.OnClick;
 
 /**
  *
@@ -110,6 +109,10 @@ public class StatisticsFragment extends BaseFragment {
   }
 
 
+  @OnClick(R.id.reset_statistics)
+  void onResetStatistics() {
+    dataService.resetStatistics(new ResetStatsCallback(StatisticsFragment.this, mainHandler));
+  }
 
   private String format(DoorsStatistics statistics) {
     StringBuilder sb = new StringBuilder();
@@ -149,6 +152,23 @@ public class StatisticsFragment extends BaseFragment {
     @Override
     protected void onFailure(StatisticsFragment fragment, DataService service, Throwable t) {
       fragment.uiHelper.showToast("Requesting statistics failed!" + t.getMessage(), Toast.LENGTH_LONG);
+    }
+  }
+
+  static class ResetStatsCallback extends AbstractDataCallback<StatisticsFragment, DataService, Void> {
+
+    public ResetStatsCallback(StatisticsFragment fragment, Handler mainHandler) throws IllegalArgumentException {
+      super(fragment, mainHandler);
+    }
+
+    @Override
+    protected void onSuccess(StatisticsFragment fragment, DataService service, Void result) {
+      fragment.requestStatistics();
+    }
+
+    @Override
+    protected void onFailure(StatisticsFragment fragment, DataService service, Throwable t) {
+      fragment.uiHelper.showToast("Reset statistics failed! "+ t.getMessage(), Toast.LENGTH_SHORT);
     }
   }
 }

@@ -110,7 +110,7 @@ public class DataServiceImpl implements DataService {
                           DoorsEntrypoint endpoint) throws IOException {
 
         String logsUrl = endpoint.getLinkByRel("logs").getHref();
-        Response<Logs> logs = service.logs(logsUrl, null, null).execute();
+        Response<Logs> logs = service.logs(logsUrl, 50, 0).execute();
 
         return logs;
       }
@@ -251,6 +251,19 @@ public class DataServiceImpl implements DataService {
         Response<DoorsAction> action = apiService.close(entrypoint.getLinkByRel("close").getHref()).execute();
 
         return action;
+      }
+    });
+  }
+
+  @Override
+  public void resetStatistics(DataCallback<DataService, Void> callback) {
+    executor.execute(new EntryPointRequestor<DataService, Void>(
+        DataServiceImpl.this, apiService, hostWrapper, callback){
+
+      @Override
+      Response<Void> onExecute(RestApiService service, HostWrapper hostWrapper, DoorsEntrypoint entrypoint) throws IOException {
+        Response<Void> logs = apiService.deleteStatistics(entrypoint.getLinkByRel("stats").getHref()).execute();
+        return logs;
       }
     });
   }

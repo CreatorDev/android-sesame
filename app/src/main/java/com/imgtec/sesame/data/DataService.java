@@ -67,4 +67,6 @@ public interface DataService {
   void openDoors(DataCallback<DataService, DoorsAction> callback);
 
   void closeDoors(DataCallback<DataService, DoorsAction> callback);
+
+  void resetStatistics(DataCallback<DataService, Void> callback);
 }
