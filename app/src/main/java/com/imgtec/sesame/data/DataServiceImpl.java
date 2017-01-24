@@ -33,6 +33,7 @@ package com.imgtec.sesame.data;
 
 import android.os.Handler;
 
+import com.imgtec.sesame.data.api.DoorsHelper;
 import com.imgtec.sesame.data.api.HostWrapper;
 import com.imgtec.sesame.data.api.RestApiService;
 import com.imgtec.sesame.data.api.pojo.Api;
@@ -148,7 +149,7 @@ public class DataServiceImpl implements DataService {
             .execute();
 
         DoorsState s = state.body();
-        if (isDoorOpened(s) || isDoorClosed(s)) {
+        if (DoorsHelper.isDoorOpened(s) || DoorsHelper.isDoorClosed(s)) {
           synchronized (DataServiceImpl.this) {
             doorState = s;
           }
@@ -157,14 +158,6 @@ public class DataServiceImpl implements DataService {
         return state;
       }
     });
-  }
-
-  private static boolean isDoorOpened(DoorsState s) {
-    return (s != null && s.getState().toLowerCase().equals("opened"));
-  }
-
-  private static boolean isDoorClosed(DoorsState s) {
-    return (s != null && s.getState().toLowerCase().equals("closed"));
   }
 
   @Override

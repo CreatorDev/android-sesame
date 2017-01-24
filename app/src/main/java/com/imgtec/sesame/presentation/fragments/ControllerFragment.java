@@ -54,6 +54,7 @@ import com.imgtec.sesame.data.Configuration;
 import com.imgtec.sesame.data.DataService;
 import com.imgtec.sesame.data.Preferences;
 import com.imgtec.sesame.data.api.CredentialsWrapper;
+import com.imgtec.sesame.data.api.DoorsHelper;
 import com.imgtec.sesame.data.api.HostWrapper;
 import com.imgtec.sesame.data.api.pojo.DoorsAction;
 import com.imgtec.sesame.data.api.pojo.DoorsState;
@@ -90,6 +91,7 @@ public class ControllerFragment extends BaseFragment {
   @BindView(R.id.status_message) TextView statusMessage;
 
   private AlertDialog configurationDialog;
+  boolean doorsInMove = true;
 
   public ControllerFragment() {
     // Required empty public constructor
@@ -166,7 +168,7 @@ public class ControllerFragment extends BaseFragment {
   void onOperateClicked(Button btn) {
     if (btn == operate) {
       final DoorsState lastDoorsState = dataService.getLastDoorsState();
-      if (lastDoorsState != null) {
+      if (lastDoorsState != null && !doorsInMove) {
         final DoorsActionCallback callback = new DoorsActionCallback(ControllerFragment.this, mainHandler);
         if (lastDoorsState.getState().toLowerCase().equals("opened") ) {
           dataService.closeDoors(callback);
@@ -257,10 +259,10 @@ public class ControllerFragment extends BaseFragment {
 
     statusMessage.setText("");
     if (lastDoorsState != null && state.toLowerCase().equals("unknown")) {
-      if (lastDoorsState.getState().toLowerCase().equals("opened") ) {
+      if (DoorsHelper.isDoorOpened(lastDoorsState) ) {
         statusMessage.setText("closing");
       }
-      else if (lastDoorsState.getState().toLowerCase().equals("closed") ) {
+      else if (DoorsHelper.isDoorClosed(lastDoorsState) ) {
         statusMessage.setText("opening");
       }
     }
@@ -292,6 +294,7 @@ public class ControllerFragment extends BaseFragment {
       if (result != null) {
         fragment.updateOnlineState();
         fragment.updateStatusMessage(result.getState(), service.getLastDoorsState());
+        fragment.updateDoorsMove(result);
       }
     }
 
@@ -301,6 +304,10 @@ public class ControllerFragment extends BaseFragment {
       fragment.updateOfflineState();
       fragment.updateStatusMessage(t, service.getLastDoorsState());
     }
+  }
+
+  private void updateDoorsMove(DoorsState result) {
+    doorsInMove = !(DoorsHelper.isDoorClosed(result) || DoorsHelper.isDoorOpened(result));
   }
 
 
@@ -315,11 +322,12 @@ public class ControllerFragment extends BaseFragment {
 
     @Override
     protected void onSuccess(ControllerFragment fragment, DataService service, DoorsAction result) {
-
+      fragment.doorsInMove = true;
     }
 
     @Override
     protected void onFailure(ControllerFragment fragment, DataService service, Throwable t) {
+      fragment.doorsInMove = false;
       fragment.uiHelper.showToast("Performing action failed: " + t.getMessage(), Toast.LENGTH_SHORT);
     }
   }
