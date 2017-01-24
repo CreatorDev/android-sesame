@@ -346,12 +346,9 @@ public class DataServiceImpl implements DataService {
 
         callback.onSuccess(service, response.body());
       }
-      catch (IOException e) {
+      catch (Exception e) {
         logger.error("Executing task failed!", e);
         notifyFailure(service, callback, e);
-      }
-      catch (Exception e2) {
-        logger.error("Executing task failed!", e2);
       }
     }
 

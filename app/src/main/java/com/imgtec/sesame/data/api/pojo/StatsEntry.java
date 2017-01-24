@@ -41,37 +41,37 @@ public class StatsEntry {
 
   @SerializedName("min")
   @Expose
-  private Integer min;
+  private Double min;
 
   @SerializedName("max")
   @Expose
-  private Integer max;
+  private Double max;
 
   @SerializedName("avg")
   @Expose
-  private Integer avg;
+  private Double avg;
 
-  public Integer getMin() {
+  public Double getMin() {
     return min;
   }
 
-  public void setMin(Integer min) {
+  public void setMin(Double min) {
     this.min = min;
   }
 
-  public Integer getMax() {
+  public Double getMax() {
     return max;
   }
 
-  public void setMax(Integer max) {
+  public void setMax(Double max) {
     this.max = max;
   }
 
-  public Integer getAvg() {
+  public Double getAvg() {
     return avg;
   }
 
-  public void setAvg(Integer avg) {
+  public void setAvg(Double avg) {
     this.avg = avg;
   }
 }

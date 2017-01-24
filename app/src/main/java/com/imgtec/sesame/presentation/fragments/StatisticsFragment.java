@@ -32,6 +32,8 @@
 package com.imgtec.sesame.presentation.fragments;
 
 
+import android.icu.text.DecimalFormat;
+import android.icu.text.NumberFormat;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
@@ -107,20 +109,28 @@ public class StatisticsFragment extends BaseFragment {
     text.setText(format(statistics));
   }
 
+
+
   private String format(DoorsStatistics statistics) {
     StringBuilder sb = new StringBuilder();
     sb.append(getString(R.string.since)).append(":\t").append(statistics.getSince()).append("\n");
+    sb.append("\n");
     sb.append(getString(R.string.openings)).append(":\n");
     format(statistics.getOpening(), sb);
+    sb.append("\n");
     sb.append(getString(R.string.closings)).append(":\n");
     format(statistics.getClosing(), sb);
     return sb.toString();
   }
 
   private void format(StatsEntry statsEntry, StringBuilder sb) {
-    sb.append("\t").append(getString(R.string.min)).append(":\t").append(statsEntry.getMin()).append("\n");
-    sb.append("\t").append(getString(R.string.max)).append(":\t").append(statsEntry.getMax()).append("\n");
-    sb.append("\t").append(getString(R.string.avg)).append(":\t").append(statsEntry.getAvg()).append("\n");
+    sb.append("\t").append(getString(R.string.min)).append(":\t").append(format(statsEntry.getMin())).append("\n");
+    sb.append("\t").append(getString(R.string.max)).append(":\t").append(format(statsEntry.getMax())).append("\n");
+    sb.append("\t").append(getString(R.string.avg)).append(":\t").append(format(statsEntry.getAvg())).append("\n");
+  }
+
+  private static String format(Double value) {
+    return java.text.NumberFormat.getNumberInstance().format(value);
   }
 
 
