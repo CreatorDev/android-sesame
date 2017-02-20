@@ -12,9 +12,10 @@ android:
     - extra-android-m2repository
 
 before_script:
+    - cp app/gradle.properties.sample app/gradle.properties
 
 script:
-    - ./gradlew assemble
+    - ./gradlew assembleDebug
 
 before_cache:
   - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
